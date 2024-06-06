@@ -75,7 +75,7 @@ def prepare(rType="MAIN"):
         printc("Install MariaDB 10.5 repository")
         os.system("apt-get install -y software-properties-common > /dev/null")
         os.system("apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 >/dev/null 2>&1")
-        os.system("add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://mirror.lstn.net/mariadb/repo/10.5/ubuntu noble main'  > /dev/null")
+        os.system("add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://mirror.lstn.net/mariadb/repo/10.5/ubuntu focal main'  > /dev/null")
         os.system("apt-get update > /dev/null")
     for rPackage in rPackages:
         printc("Installing %s" % rPackage)
@@ -109,9 +109,6 @@ def install(rType="MAIN"):
     printc("Failed to download installation file!", col.BRIGHT_RED)
     return False
 
-import os
-import zipfile
-
 def update(rType="MAIN"):
     if rType == "UPDATE":
         printc("Enter the link of release_xyz.zip file:", col.BRIGHT_RED)
@@ -121,8 +118,7 @@ def update(rType="MAIN"):
         printc("Downloading Software Update")  
     os.system('wget -q -O "/tmp/update.zip" "%s"' % rlink)
     if os.path.exists("/tmp/update.zip"):
-        try:
-            is_ok = zipfile.ZipFile("/tmp/update.zip")
+        try: is_ok = zipfile.ZipFile("/tmp/update.zip")
         except:
             printc("Invalid link or zip file is corrupted!", col.BRIGHT_RED)
             os.remove("/tmp/update.zip")
@@ -130,127 +126,73 @@ def update(rType="MAIN"):
     rURL = rlink
     printc("Installing Admin Panel")
     if os.path.exists("/tmp/update.zip"):
-        try:
-            is_ok = zipfile.ZipFile("/tmp/update.zip")
+        try: is_ok = zipfile.ZipFile("/tmp/update.zip")
         except:
             printc("Invalid link or zip file is corrupted!", col.BRIGHT_RED)
             os.remove("/tmp/update.zip")
             return False
         printc("Updating Software")
-        os.system(r'chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null && \
-                     rm -rf /home/xtreamcodes/iptv_xtream_codes/admin > /dev/null && \
-                     rm -rf /home/xtreamcodes/iptv_xtream_codes/pytools > /dev/null && \
-                     unzip /tmp/update.zip -d /tmp/update/ > /dev/null && \
-                     cp -rf /tmp/update/XtreamUI-master/* /home/xtreamcodes/iptv_xtream_codes/ > /dev/null && \
-                     rm -rf /tmp/update/XtreamUI-master > /dev/null && \
-                     rm -rf /tmp/update > /dev/null && \
-                     chown -R xtreamcodes:xtreamcodes /home/xtreamcodes/ > /dev/null && \
-                     chmod +x /home/xtreamcodes/iptv_xtream_codes/permissions.sh > /dev/null && \
-                     chattr +i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
-        
-        if not "sudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config" in open("/home/xtreamcodes/iptv_xtream_codes/permissions.sh").read():
-            os.system(r'echo "#!/bin/bash\n\
-                           sudo chmod -R 777 /home/xtreamcodes 2>/dev/null\n\
-                           sudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type f -exec chmod 644 {} \; 2>/dev/null\n\
-                           sudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type d -exec chmod 755 {} \; 2>/dev/null\n\
-                           sudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type f -exec chmod 644 {} \; 2>/dev/null\n\
-                           sudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type d -exec chmod 755 {} \; 2>/dev/null\n\
-                           sudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx/sbin/nginx 2>/dev/null\n\
-                           sudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx_rtmp/sbin/nginx_rtmp 2>/dev/null\n\
-                           sudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config 2>/dev/null" > /home/xtreamcodes/iptv_xtream_codes/permissions.sh')
-        os.system(r'mysql -u root%s -e "USE xtream_iptvpro; \
-                   REPLACE INTO reg_users (id, username, password, email, member_group_id, verified, status) \
-                   VALUES (1, \'admin\', \'$6$rounds=20000$xtreamcodes$XThC50wfuS0YwS4ahiifzF14vkGbGsFF1w7ETL4sRRC5sOrAWCjWvQJDromZUQoQuwbAXAFdX3h3Cp3vqulpS0\', \'admin@website.com\', 1, 1, 1);" > /dev/null' % rExtra)
+        os.system('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null && rm -rf /home/xtreamcodes/iptv_xtream_codes/admin > /dev/null && rm -rf /home/xtreamcodes/iptv_xtream_codes/pytools > /dev/null && unzip /tmp/update.zip -d /tmp/update/ > /dev/null && cp -rf /tmp/update/XtreamUI-master/* /home/xtreamcodes/iptv_xtream_codes/ > /dev/null && rm -rf /tmp/update/XtreamUI-master > /dev/null && rm -rf /tmp/update > /dev/null && chown -R xtreamcodes:xtreamcodes /home/xtreamcodes/ > /dev/null && chmod +x /home/xtreamcodes/iptv_xtream_codes/permissions.sh > /dev/null && chattr +i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
+        if not "sudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config" in open("/home/xtreamcodes/iptv_xtream_codes/permissions.sh").read(): os.system('echo "#!/bin/bash\nsudo chmod -R 777 /home/xtreamcodes 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type f -exec chmod 644 {} \; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type d -exec chmod 755 {} \; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type f -exec chmod 644 {} \; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type d -exec chmod 755 {} \; 2>/dev/null\nsudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx/sbin/nginx 2>/dev/null\nsudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx_rtmp/sbin/nginx_rtmp 2>/dev/null\nsudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config 2>/dev/null" > /home/xtreamcodes/iptv_xtream_codes/permissions.sh')
         os.system("/home/xtreamcodes/iptv_xtream_codes/permissions.sh > /dev/null")
-        try:
-            os.remove("/tmp/update.zip")
-        except:
-            pass
+        try: os.remove("/tmp/update.zip")
+        except: pass
         return True
     printc("Failed to download installation file!", col.BRIGHT_RED)
     return False
 
-import os
-import shutil
-
 def mysql(rUsername, rPassword):
     global rMySQLCnf
     printc("Configuring MySQL")
     rCreate = True
     if os.path.exists("/etc/mysql/my.cnf"):
-        if open("/etc/mysql/my.cnf", "r").read(14) == "# Xtream Codes":
-            rCreate = False
+        if open("/etc/mysql/my.cnf", "r").read(14) == "# Xtream Codes": rCreate = False
     if rCreate:
         shutil.copy("/etc/mysql/my.cnf", "/etc/mysql/my.cnf.xc")
-        with open("/etc/mysql/my.cnf", "wb") as rFile:
-            rFile.write(rMySQLCnf)
+        rFile = open("/etc/mysql/my.cnf", "wb")
+        rFile.write(rMySQLCnf)
+        rFile.close()
         os.system("systemctl restart mariadb > /dev/null")
-    
+    #printc("Enter MySQL Root Password:", col.BRIGHT_RED)
     for i in range(5):
-        rMySQLRoot = ""
+        rMySQLRoot = "" #raw_input("  ")
         print(" ")
-        rExtra = " -p%s" % rMySQLRoot if len(rMySQLRoot) > 0 else ""
+        if len(rMySQLRoot) > 0: rExtra = " -p%s" % rMySQLRoot
+        else: rExtra = ""
         rDrop = True
         try:
             if rDrop:
-                os.system(r'mysql -u root%s -e "DROP DATABASE IF EXISTS xtream_iptvpro; CREATE DATABASE IF NOT EXISTS xtream_iptvpro;" > /dev/null' % rExtra)
-                os.system(r'mysql -u root%s -e "USE xtream_iptvpro; DROP USER IF EXISTS \'%s\'@\'%%\';" > /dev/null' % (rExtra, rUsername))
-                os.system(r"mysql -u root%s xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql > /dev/null" % rExtra)
-                os.system(r'mysql -u root%s -e "USE xtream_iptvpro; UPDATE settings SET live_streaming_pass = \'%s\', unique_id = \'%s\', crypt_load_balancing = \'%s\';" > /dev/null' % (rExtra, generate(20), generate(10), generate(20)))
-                os.system(r'mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO streaming_servers (id, server_name, domain_name, server_ip, vpn_ip, ssh_password, ssh_port, diff_time_main, http_broadcast_port, total_clients, system_os, network_interface, latency, status, enable_geoip, geoip_countries, last_check_ago, can_delete, server_hardware, total_services, persistent_connections, rtmp_port, geoip_type, isp_names, isp_type, enable_isp, boost_fpm, http_ports_add, network_guaranteed_speed, https_broadcast_port, https_ports_add, whitelist_ips, watchdog_data, timeshift_only) VALUES (1, \'Main Server\', \'\', \'%s\', \'\', NULL, NULL, 0, 25461, 1000, \'%s\', \'eth0\', 0, 1, 0, \'\', 0, 0, \'{}\', 3, 0, 25462, \'low_priority\', \'\', \'low_priority\', 0, 1, \'\', 1000, 25463, \'\', \'[\"127.0.0.1\",\"\"]\', \'{}\', 0);" > /dev/null' % (rExtra, getIP(), getVersion()))
-                os.system(r'mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO reg_users (id, username, password, email, member_group_id, verified, status) VALUES (1, \'admin\', \'$6$rounds=20000$xtreamcodes$XThC5OwfuS0YwS4ahiifzF14vkGbGsFF1w7ETL4sRRC5sOrAWCjWvQJDromZUQoQuwbAXAFdX3h3Cp3vqulpS0\', \'admin@website.com\', 1, 1, 1);" > /dev/null' % rExtra)
-                os.system(r'mysql -u root%s -e "CREATE USER \'%s\'@\'%%\' IDENTIFIED BY \'%s\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'%s\'@\'%%\' WITH GRANT OPTION; GRANT SELECT, LOCK TABLES ON *.* TO \'%s\'@\'%%\';FLUSH PRIVILEGES;" > /dev/null' % (rExtra, rUsername, rPassword, rUsername, rUsername))
-                os.system(r'mysql -u root%s -e "USE xtream_iptvpro; CREATE TABLE IF NOT EXISTS dashboard_statistics (id int(11) NOT NULL AUTO_INCREMENT, type varchar(16) NOT NULL DEFAULT \'\', time int(16) NOT NULL DEFAULT \'0\', count int(16) NOT NULL DEFAULT \'0\', PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=latin1; INSERT INTO dashboard_statistics (type, time, count) VALUES(\'conns\', UNIX_TIMESTAMP(), 0),(\'users\', UNIX_TIMESTAMP(), 0);" > /dev/null' % rExtra)
-            try:
-                os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
-            except:
-                pass
+                os.system('mysql -u root%s -e "DROP DATABASE IF EXISTS xtream_iptvpro; CREATE DATABASE IF NOT EXISTS xtream_iptvpro;" > /dev/null' % rExtra)
+                os.system('mysql -u root%s -e "USE xtream_iptvpro; DROP USER IF EXISTS \'%s\'@\'%%\';" > /dev/null' % (rExtra, rUsername))
+                os.system("mysql -u root%s xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql > /dev/null" % rExtra)
+                os.system('mysql -u root%s -e "USE xtream_iptvpro; UPDATE settings SET live_streaming_pass = \'%s\', unique_id = \'%s\', crypt_load_balancing = \'%s\';" > /dev/null' % (rExtra, generate(20), generate(10), generate(20)))
+                os.system('mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO streaming_servers (id, server_name, domain_name, server_ip, vpn_ip, ssh_password, ssh_port, diff_time_main, http_broadcast_port, total_clients, system_os, network_interface, latency, status, enable_geoip, geoip_countries, last_check_ago, can_delete, server_hardware, total_services, persistent_connections, rtmp_port, geoip_type, isp_names, isp_type, enable_isp, boost_fpm, http_ports_add, network_guaranteed_speed, https_broadcast_port, https_ports_add, whitelist_ips, watchdog_data, timeshift_only) VALUES (1, \'Main Server\', \'\', \'%s\', \'\', NULL, NULL, 0, 25461, 1000, \'%s\', \'eth0\', 0, 1, 0, \'\', 0, 0, \'{}\', 3, 0, 25462, \'low_priority\', \'\', \'low_priority\', 0, 1, \'\', 1000, 25463, \'\', \'[\"127.0.0.1\",\"\"]\', \'{}\', 0);" > /dev/null' % (rExtra, getIP(), getVersion()))
+                os.system('mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO reg_users (id, username, password, email, member_group_id, verified, status) VALUES (1, \'admin\', \'\$6\$rounds=20000\$xtreamcodes\$XThC5OwfuS0YwS4ahiifzF14vkGbGsFF1w7ETL4sRRC5sOrAWCjWvQJDromZUQoQuwbAXAFdX3h3Cp3vqulpS0\', \'admin@website.com\', 1, 1, 1);" > /dev/null'  % rExtra)
+                os.system('mysql -u root%s -e "CREATE USER \'%s\'@\'%%\' IDENTIFIED BY \'%s\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'%s\'@\'%%\' WITH GRANT OPTION; GRANT SELECT, LOCK TABLES ON *.* TO \'%s\'@\'%%\';FLUSH PRIVILEGES;" > /dev/null' % (rExtra, rUsername, rPassword, rUsername, rUsername))
+                os.system('mysql -u root%s -e "USE xtream_iptvpro; CREATE TABLE IF NOT EXISTS dashboard_statistics (id int(11) NOT NULL AUTO_INCREMENT, type varchar(16) NOT NULL DEFAULT \'\', time int(16) NOT NULL DEFAULT \'0\', count int(16) NOT NULL DEFAULT \'0\', PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=latin1; INSERT INTO dashboard_statistics (type, time, count) VALUES(\'conns\', UNIX_TIMESTAMP(), 0),(\'users\', UNIX_TIMESTAMP(), 0);\" > /dev/null' % rExtra)
+            try: os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
+            except: pass
             return True
-        except:
-            printc("Invalid password! Try again", col.BRIGHT_RED)
+        except: printc("Invalid password! Try again", col.BRIGHT_RED)
     return False
 
+def encrypt(rHost="127.0.0.1", rUsername="user_iptvpro", rPassword="", rDatabase="xtream_iptvpro", rServerID=1, rPort=7999):
+    if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):
+        rDecrypt = decrypt()
+        rHost = rDecrypt["host"]
+        rPassword = rDecrypt["db_pass"]
+        rServerID = int(rDecrypt["server_id"])
+        rUsername = rDecrypt["db_user"]
+        rDatabase = rDecrypt["db_name"]
+        rPort = int(rDecrypt["db_port"])
+    printc("Encrypting...")
+    try: os.remove("/home/xtreamcodes/iptv_xtream_codes/config")
+    except: pass
 
-import os
-import shutil
-
-def mysql(rUsername, rPassword):
-    global rMySQLCnf
-    printc("Configuring MySQL")
-    rCreate = True
-    if os.path.exists("/etc/mysql/my.cnf"):
-        if open("/etc/mysql/my.cnf", "r").read(14) == "# Xtream Codes":
-            rCreate = False
-    if rCreate:
-        shutil.copy("/etc/mysql/my.cnf", "/etc/mysql/my.cnf.xc")
-        with open("/etc/mysql/my.cnf", "wb") as rFile:
-            rFile.write(rMySQLCnf)
-        os.system("systemctl restart mariadb > /dev/null")
-    
-    for i in range(5):
-        rMySQLRoot = ""
-        print(" ")
-        rExtra = " -p%s" % rMySQLRoot if len(rMySQLRoot) > 0 else ""
-        rDrop = True
-        try:
-            if rDrop:
-                os.system(r'mysql -u root%s -e "DROP DATABASE IF EXISTS xtream_iptvpro; CREATE DATABASE IF NOT EXISTS xtream_iptvpro;" > /dev/null' % rExtra)
-                os.system(r'mysql -u root%s -e "USE xtream_iptvpro; DROP USER IF EXISTS \'%s\'@\'%%\';" > /dev/null' % (rExtra, rUsername))
-                os.system(r"mysql -u root%s xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql > /dev/null" % rExtra)
-                os.system(r'mysql -u root%s -e "USE xtream_iptvpro; UPDATE settings SET live_streaming_pass = \'%s\', unique_id = \'%s\', crypt_load_balancing = \'%s\';" > /dev/null' % (rExtra, generate(20), generate(10), generate(20)))
-                os.system(r'mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO streaming_servers (id, server_name, domain_name, server_ip, vpn_ip, ssh_password, ssh_port, diff_time_main, http_broadcast_port, total_clients, system_os, network_interface, latency, status, enable_geoip, geoip_countries, last_check_ago, can_delete, server_hardware, total_services, persistent_connections, rtmp_port, geoip_type, isp_names, isp_type, enable_isp, boost_fpm, http_ports_add, network_guaranteed_speed, https_broadcast_port, https_ports_add, whitelist_ips, watchdog_data, timeshift_only) VALUES (1, \'Main Server\', \'\', \'%s\', \'\', NULL, NULL, 0, 25461, 1000, \'%s\', \'eth0\', 0, 1, 0, \'\', 0, 0, \'{}\', 3, 0, 25462, \'low_priority\', \'\', \'low_priority\', 0, 1, \'\', 1000, 25463, \'\', \'[\"127.0.0.1\",\"\"]\', \'{}\', 0);" > /dev/null' % (rExtra, getIP(), getVersion()))
-                os.system(r'mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO reg_users (id, username, password, email, member_group_id, verified, status) VALUES (1, \'admin\', r\'\$6\$rounds=20000\$xtreamcodes\$XThC50wfuS0YwS4ahiifzF14vkGbGsFF1w7ETL4sRRC5sOrAWCjWvQJDromZUQoQuwbAXAFdX3h3Cp3vqulpS0\', \'admin@website.com\', 1, 1, 1);" > /dev/null' % rExtra)
-                os.system(r'mysql -u root%s -e "CREATE USER \'%s\'@\'%%\' IDENTIFIED BY \'%s\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'%s\'@\'%%\' WITH GRANT OPTION; GRANT SELECT, LOCK TABLES ON *.* TO \'%s\'@\'%%\';FLUSH PRIVILEGES;" > /dev/null' % (rExtra, rUsername, rPassword, rUsername, rUsername))
-                os.system(r'mysql -u root%s -e "USE xtream_iptvpro; CREATE TABLE IF NOT EXISTS dashboard_statistics (id int(11) NOT NULL AUTO_INCREMENT, type varchar(16) NOT NULL DEFAULT \'\', time int(16) NOT NULL DEFAULT \'0\', count int(16) NOT NULL DEFAULT \'0\', PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=latin1; INSERT INTO dashboard_statistics (type, time, count) VALUES(\'conns\', UNIX_TIMESTAMP(), 0),(\'users\', UNIX_TIMESTAMP(), 0);" > /dev/null' % rExtra)
-            try:
-                os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
-            except:
-                pass
-            return True
-        except:
-            printc("Invalid password! Try again", col.BRIGHT_RED)
-    return False
-
+    rf = open('/home/xtreamcodes/iptv_xtream_codes/config', 'wb')
+    lestring=''.join(chr(ord(c)^ord(k)) for c,k in zip('{\"host\":\"%s\",\"db_user\":\"%s\",\"db_pass\":\"%s\",\"db_name\":\"%s\",\"server_id\":\"%d\", \"db_port\":\"%d\"}' % (rHost, rUsername, rPassword, rDatabase, rServerID, rPort), cycle('5709650b0d7806074842c6de575025b1')))
+    rf.write(base64.b64encode(bytes(lestring, 'ascii')))
+    rf.close()
 
 
 def decrypt():
@@ -296,119 +238,74 @@ def start(first=True):
     else: printc("Restarting Xtream Codes")
     os.system("/home/xtreamcodes/iptv_xtream_codes/start_services.sh > /dev/null")
 
-import os
-import shutil
-
-def printc(text, color=None, newline=1):
-    if color:
-        print(color + text + '\033[0m', end='\n' * newline)
-    else:
-        print(text, end='\n' * newline)
-
 def modifyNginx():
     printc("Modifying Nginx")
     rPath = "/home/xtreamcodes/iptv_xtream_codes/nginx/conf/nginx.conf"
-    with open(rPath, "r") as file:
-        rPrevData = file.read()
-    if "listen 25500;" not in rPrevData:
+    rPrevData = open(rPath, "r").read()
+    if not "listen 25500;" in rPrevData:
         shutil.copy(rPath, "%s.xc" % rPath)
-        rData = "}".join(rPrevData.split("}")[:-1]) + r"""    server {
-        listen 25500;
-        index index.php index.html index.htm;
-        root /home/xtreamcodes/iptv_xtream_codes/admin/;
-
-        location ~ \.php$ {
-            limit_req zone=one burst=8;
-            try_files $uri =404;
-            fastcgi_index index.php;
-            fastcgi_pass php;
-            include fastcgi_params;
-            fastcgi_buffering on;
-            fastcgi_buffers 96 32k;
-            fastcgi_buffer_size 32k;
-            fastcgi_max_temp_file_size 0;
-            fastcgi_keep_conn on;
-            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-            fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-        }
-    }
-}"""
-        with open(rPath, "w") as rFile:
-            rFile.write(rData)
+        rData = "}".join(rPrevData.split("}")[:-1]) + "    server {\n        listen 25500;\n        index index.php index.html index.htm;\n        root /home/xtreamcodes/iptv_xtream_codes/admin/;\n\n        location ~ \.php$ {\n			limit_req zone=one burst=8;\n            try_files $uri =404;\n			fastcgi_index index.php;\n			fastcgi_pass php;\n			include fastcgi_params;\n			fastcgi_buffering on;\n			fastcgi_buffers 96 32k;\n			fastcgi_buffer_size 32k;\n			fastcgi_max_temp_file_size 0;\n			fastcgi_keep_conn on;\n			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n			fastcgi_param SCRIPT_NAME $fastcgi_script_name;\n        }\n    }\n}"
+        rFile = open(rPath, "w")
+        rFile.write(rData)
+        rFile.close()
 
 if __name__ == "__main__":
-    rVersions = ["20.04", "20.10", "22.04", "نسخه سیستم عامل شما"]  # Example supported versions
-    try: 
-        rVersion = os.popen('lsb_release -sr').read().strip()
-    except: 
-        rVersion = None
-    # غیرفعال کردن بررسی نسخه
-    # if rVersion not in rVersions:
-    #     printc("Unsupported Operating System, Works only on Ubuntu Server 20")
-    #     sys.exit(1)
-    
-    printc("X-UI 22f Ubuntu %s Installer - XoceUnder" % rVersion, '\033[32m', 2)
+    try: rVersion = os.popen('lsb_release -sr').read().strip()
+    except: rVersion = None
+    if not rVersion in rVersions:
+        printc("Unsupported Operating System, Works only on Ubuntu Server 24")
+        sys.exit(1)
+    printc("X-UI 22f Ubuntu %s Installer - XoceUnder" % rVersion, col.GREEN, 2)
     print(" ")
-    rType = input("  Installation Type [MAIN, LB, UPDATE]: ").upper()
+    rType = input("  Installation Type [MAIN, LB, UPDATE]: ")
     print(" ")
-
-    if rType in ["MAIN", "LB"]:
-        if rType == "LB":
+    if rType.upper() in ["MAIN", "LB"]:
+        if rType.upper() == "LB":
             rHost = input("  Main Server IP Address: ")
             rPassword = input("  MySQL Password: ")
-            try: 
-                rServerID = int(input("  Load Balancer Server ID: "))
-            except: 
-                rServerID = -1
+            try: rServerID = int(input("  Load Balancer Server ID: "))
+            except: rServerID = -1
             print(" ")
         else:
             rHost = "127.0.0.1"
             rPassword = generate()
             rServerID = 1
-
         rUsername = "user_iptvpro"
         rDatabase = "xtream_iptvpro"
         rPort = 7999
-
         if len(rHost) > 0 and len(rPassword) > 0 and rServerID > -1:
-            printc("Start installation? Y/N", '\033[93m')
+            printc("Start installation? Y/N", col.BRIGHT_YELLOW)
             if input("  ").upper() == "Y":
                 print(" ")
-                rRet = prepare(rType)
-                if not install(rType): 
-                    sys.exit(1)
-                if rType == "MAIN":
-                    if not mysql(rUsername, rPassword): 
-                        sys.exit(1)
+                rRet = prepare(rType.upper())
+                if not install(rType.upper()): sys.exit(1)
+                if rType.upper() == "MAIN":
+                    if not mysql(rUsername, rPassword): sys.exit(1)
                 encrypt(rHost, rUsername, rPassword, rDatabase, rServerID, rPort)
                 configure()
-                if rType == "MAIN": 
+                if rType.upper() == "MAIN": 
                     modifyNginx()
-                    update(rType)
+                    update(rType.upper())
                 start()
-                printc("Installation completed!", '\033[32m', 2)
-                if rType == "MAIN":
-                    printc("Please store your MySQL password: %s" % rPassword, '\033[93m')
-                    printc("Admin UI Wan IP: http://%s:25500" % getIP(), '\033[93m')
-                    printc("Admin UI default login is admin/admin", '\033[93m')
-                    printc("Save Credentials is file to /root/credentials.txt", '\033[93m')
-                    with open("/root/credentials.txt", "w") as rFile:
-                        rFile.write("MySQL password: %s\n" % rPassword)
-                        rFile.write("Admin UI Wan IP: http://%s:25500\n" % getIP())
-                        rFile.write("Admin UI default login is admin/admin\n")
-            else: 
-                printc("Installation cancelled", '\033[91m')
-        else: 
-            printc("Invalid entries", '\033[91m')
-    elif rType == "UPDATE":
+                printc("Installation completed!", col.GREEN, 2)
+                if rType.upper() == "MAIN":
+                    printc("Please store your MySQL password: %s" % rPassword, col.BRIGHT_YELLOW)
+                    printc("Admin UI Wan IP: http://%s:25500" % getIP(), col.BRIGHT_YELLOW)
+                    printc("Admin UI default login is admin/admin", col.BRIGHT_YELLOW)
+                    printc("Save Credentials is file to /root/credentials.txt", col.BRIGHT_YELLOW)
+                    rFile = open("/root/credentials.txt", "w")
+                    rFile.write("MySQL password: %s\n" % rPassword)
+                    rFile.write("Admin UI Wan IP: http://%s:25500\n" % getIP())
+                    rFile.write("Admin UI default login is admin/admin\n")
+                    rFile.close()
+            else: printc("Installation cancelled", col.BRIGHT_RED)
+        else: printc("Invalid entries", col.BRIGHT_RED)
+    elif rType.upper() == "UPDATE":
         if os.path.exists("/home/xtreamcodes/iptv_xtream_codes/wwwdir/api.php"):
-            printc("Update Admin Panel? Y/N?", '\033[93m')
+            printc("Update Admin Panel? Y/N?", col.BRIGHT_YELLOW)
             if input("  ").upper() == "Y":
-                if not update(rType): 
-                    sys.exit(1)
-                printc("Installation completed!", '\033[32m', 2)
+                if not update(rType.upper()): sys.exit(1)
+                printc("Installation completed!", col.GREEN, 2)
                 start()
-            else: 
-                printc("Install Xtream Codes Main first!", '\033[91m')
-    else: 
-        printc("Invalid installation type", '\033[91m')
+            else: printc("Install Xtream Codes Main first!", col.BRIGHT_RED)
+    else: printc("Invalid installation type", col.BRIGHT_RED)
