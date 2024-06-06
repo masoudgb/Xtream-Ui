@@ -337,7 +337,7 @@ def modifyNginx():
             rFile.write(rData)
 
 if __name__ == "__main__":
-    rVersions = ["20.04", "20.10", "22.04"]  # Example supported versions
+    rVersions = ["24.04", "24.10", "22.04"]  # Example supported versions
     try: 
         rVersion = os.popen('lsb_release -sr').read().strip()
     except: 
