@@ -296,74 +296,118 @@ def start(first=True):
     else: printc("Restarting Xtream Codes")
     os.system("/home/xtreamcodes/iptv_xtream_codes/start_services.sh > /dev/null")
 
+import os
+import shutil
+
+def printc(text, color=None, newline=1):
+    if color:
+        print(color + text + '\033[0m', end='\n' * newline)
+    else:
+        print(text, end='\n' * newline)
+
 def modifyNginx():
     printc("Modifying Nginx")
     rPath = "/home/xtreamcodes/iptv_xtream_codes/nginx/conf/nginx.conf"
-    rPrevData = open(rPath, "r").read()
-    if not "listen 25500;" in rPrevData:
+    with open(rPath, "r") as file:
+        rPrevData = file.read()
+    if "listen 25500;" not in rPrevData:
         shutil.copy(rPath, "%s.xc" % rPath)
-        rData = "}".join(rPrevData.split("}")[:-1]) + "    server {\n        listen 25500;\n        index index.php index.html index.htm;\n        root /home/xtreamcodes/iptv_xtream_codes/admin/;\n\n        location ~ \.php$ {\n			limit_req zone=one burst=8;\n            try_files $uri =404;\n			fastcgi_index index.php;\n			fastcgi_pass php;\n			include fastcgi_params;\n			fastcgi_buffering on;\n			fastcgi_buffers 96 32k;\n			fastcgi_buffer_size 32k;\n			fastcgi_max_temp_file_size 0;\n			fastcgi_keep_conn on;\n			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n			fastcgi_param SCRIPT_NAME $fastcgi_script_name;\n        }\n    }\n}"
-        rFile = open(rPath, "w")
-        rFile.write(rData)
-        rFile.close()
+        rData = "}".join(rPrevData.split("}")[:-1]) + r"""    server {
+        listen 25500;
+        index index.php index.html index.htm;
+        root /home/xtreamcodes/iptv_xtream_codes/admin/;
+
+        location ~ \.php$ {
+            limit_req zone=one burst=8;
+            try_files $uri =404;
+            fastcgi_index index.php;
+            fastcgi_pass php;
+            include fastcgi_params;
+            fastcgi_buffering on;
+            fastcgi_buffers 96 32k;
+            fastcgi_buffer_size 32k;
+            fastcgi_max_temp_file_size 0;
+            fastcgi_keep_conn on;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        }
+    }
+}"""
+        with open(rPath, "w") as rFile:
+            rFile.write(rData)
 
 if __name__ == "__main__":
-    try: rVersion = os.popen('lsb_release -sr').read().strip()
-    except: rVersion = None
-    if not rVersion in rVersions:
+    rVersions = ["20.04", "20.10", "22.04"]  # Example supported versions
+    try: 
+        rVersion = os.popen('lsb_release -sr').read().strip()
+    except: 
+        rVersion = None
+    if rVersion not in rVersions:
         printc("Unsupported Operating System, Works only on Ubuntu Server 20")
         sys.exit(1)
-    printc("X-UI 22f Ubuntu %s Installer - XoceUnder" % rVersion, col.GREEN, 2)
+    
+    printc("X-UI 22f Ubuntu %s Installer - XoceUnder" % rVersion, '\033[32m', 2)
     print(" ")
-    rType = input("  Installation Type [MAIN, LB, UPDATE]: ")
+    rType = input("  Installation Type [MAIN, LB, UPDATE]: ").upper()
     print(" ")
-    if rType.upper() in ["MAIN", "LB"]:
-        if rType.upper() == "LB":
+
+    if rType in ["MAIN", "LB"]:
+        if rType == "LB":
             rHost = input("  Main Server IP Address: ")
             rPassword = input("  MySQL Password: ")
-            try: rServerID = int(input("  Load Balancer Server ID: "))
-            except: rServerID = -1
+            try: 
+                rServerID = int(input("  Load Balancer Server ID: "))
+            except: 
+                rServerID = -1
             print(" ")
         else:
             rHost = "127.0.0.1"
             rPassword = generate()
             rServerID = 1
+
         rUsername = "user_iptvpro"
         rDatabase = "xtream_iptvpro"
         rPort = 7999
+
         if len(rHost) > 0 and len(rPassword) > 0 and rServerID > -1:
-            printc("Start installation? Y/N", col.BRIGHT_YELLOW)
+            printc("Start installation? Y/N", '\033[93m')
             if input("  ").upper() == "Y":
                 print(" ")
-                rRet = prepare(rType.upper())
-                if not install(rType.upper()): sys.exit(1)
-                if rType.upper() == "MAIN":
-                    if not mysql(rUsername, rPassword): sys.exit(1)
+                rRet = prepare(rType)
+                if not install(rType): 
+                    sys.exit(1)
+                if rType == "MAIN":
+                    if not mysql(rUsername, rPassword): 
+                        sys.exit(1)
                 encrypt(rHost, rUsername, rPassword, rDatabase, rServerID, rPort)
                 configure()
-                if rType.upper() == "MAIN": 
+                if rType == "MAIN": 
                     modifyNginx()
-                    update(rType.upper())
+                    update(rType)
                 start()
-                printc("Installation completed!", col.GREEN, 2)
-                if rType.upper() == "MAIN":
-                    printc("Please store your MySQL password: %s" % rPassword, col.BRIGHT_YELLOW)
-                    printc("Admin UI Wan IP: http://%s:25500" % getIP(), col.BRIGHT_YELLOW)
-                    printc("Admin UI default login is admin/admin", col.BRIGHT_YELLOW)
-                    printc("Save Credentials is file to /root/credentials.txt", col.BRIGHT_YELLOW)
-                    rFile = open("/root/credentials.txt", "w")
-                    rFile.write("MySQL password: %s\n" % rPassword)
-                    rFile.write("Admin UI Wan IP: http://%s:25500\n" % getIP())
-                    rFile.write("Admin UI default login is admin/admin\n")
-                    rFile.close()
-            else: printc("Installation cancelled", col.BRIGHT_RED)
-        else: printc("Invalid entries", col.BRIGHT_RED)
-    elif rType.upper() == "UPDATE":
+                printc("Installation completed!", '\033[32m', 2)
+                if rType == "MAIN":
+                    printc("Please store your MySQL password: %s" % rPassword, '\033[93m')
+                    printc("Admin UI Wan IP: http://%s:25500" % getIP(), '\033[93m')
+                    printc("Admin UI default login is admin/admin", '\033[93m')
+                    printc("Save Credentials is file to /root/credentials.txt", '\033[93m')
+                    with open("/root/credentials.txt", "w") as rFile:
+                        rFile.write("MySQL password: %s\n" % rPassword)
+                        rFile.write("Admin UI Wan IP: http://%s:25500\n" % getIP())
+                        rFile.write("Admin UI default login is admin/admin\n")
+            else: 
+                printc("Installation cancelled", '\033[91m')
+        else: 
+            printc("Invalid entries", '\033[91m')
+    elif rType == "UPDATE":
         if os.path.exists("/home/xtreamcodes/iptv_xtream_codes/wwwdir/api.php"):
-            printc("Update Admin Panel? Y/N?", col.BRIGHT_YELLOW)
+            printc("Update Admin Panel? Y/N?", '\033[93m')
             if input("  ").upper() == "Y":
-                if not update(rType.upper()): sys.exit(1)
-                printc("Installation completed!", col.GREEN, 2)
+                if not update(rType): 
+                    sys.exit(1)
+                printc("Installation completed!", '\033[32m', 2)
                 start()
-            else: printc("Install Xtream Codes Main first!", col.BRIGHT_RED)
-    else: printc("Invalid installation type", col.BRIGHT_RED)
+            else: 
+                printc("Install Xtream Codes Main first!", '\033[91m')
+    else: 
+        printc("Invalid installation type", '\033[91m')
