@@ -337,14 +337,15 @@ def modifyNginx():
             rFile.write(rData)
 
 if __name__ == "__main__":
-    rVersions = ["24.04", "24.10", "22.04"]  # Example supported versions
+    rVersions = ["20.04", "20.10", "22.04", "نسخه سیستم عامل شما"]  # Example supported versions
     try: 
         rVersion = os.popen('lsb_release -sr').read().strip()
     except: 
         rVersion = None
-    if rVersion not in rVersions:
-        printc("Unsupported Operating System, Works only on Ubuntu Server 20")
-        sys.exit(1)
+    # غیرفعال کردن بررسی نسخه
+    # if rVersion not in rVersions:
+    #     printc("Unsupported Operating System, Works only on Ubuntu Server 20")
+    #     sys.exit(1)
     
     printc("X-UI 22f Ubuntu %s Installer - XoceUnder" % rVersion, '\033[32m', 2)
     print(" ")
