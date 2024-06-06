@@ -74,10 +74,18 @@ def prepare(rType="MAIN"):
     if rType == "MAIN":
         printc("Install MariaDB 11.5 repository")
         os.system("apt-get install -y software-properties-common > /dev/null")
-        os.system("apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 >/dev/null 2>&1")
-        os.system("add-apt-repository 'deb [arch=amd64,arm64,ppc64el,s390x] http://mirror.lstn.net/mariadb/repo/11.5/ubuntu noble main' -y > /dev/null")
+        
+        # دانلود و اضافه کردن کلید GPG به روش جدید
+        os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg")
+        
+        # اضافه کردن مخزن با اشاره به کلید جدید
+        os.system("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] http://mirror.lstn.net/mariadb/repo/11.5/ubuntu focal main' | tee /etc/apt/sources.list.d/mariadb.list")
+        
         os.system("apt-get update > /dev/null")
+        os.system("apt-get install -y mariadb-server > /dev/null")
+        
     for rPackage in rPackages:
+        os.system(f"apt-get install -y {rPackage} > /dev/null")
         printc("Installing %s" % rPackage)
         os.system("apt-get install %s -y > /dev/null" % rPackage)
     printc("Installing pip2 and python2 paramiko")
