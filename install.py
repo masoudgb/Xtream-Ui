@@ -72,14 +72,12 @@ def prepare(rType="MAIN"):
     os.system("apt-get update > /dev/null")
     os.system("apt-get -y full-upgrade > /dev/null")
     if rType == "MAIN":
-        printc("Install MariaDB 11.4.2 repository")
+        printc("Install MariaDB 11.5 repository")
         os.system("apt-get install -y software-properties-common > /dev/null")
         
         # دانلود و اضافه کردن کلید GPG به روش جدید
         os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg > /dev/null")
-        
-        # اضافه کردن مخزن با اشاره به کلید جدید
-        os.system("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] http://mirror.lstn.net/mariadb/repo/11.4.2/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list > /dev/null")
+        os.system("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list > /dev/null")
         
         os.system("apt-get update > /dev/null")
         os.system("apt-get install -y mariadb-server > /dev/null")
