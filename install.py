@@ -81,8 +81,8 @@ def prepare(rType="MAIN"):
         
     for rPackage in rPackages:
         os.system(f"apt-get install -y {rPackage} > /dev/null")
-    #printc("Creating symlink for libzip")
-    #os.system("ln -s /usr/lib/x86_64-linux-gnu/libzip.so.4 /usr/lib/x86_64-linux-gnu/libzip.so.5")
+    printc("Creating symlink for libzip")
+    os.system("ln -s /usr/lib/x86_64-linux-gnu/libzip.so.4 /usr/lib/x86_64-linux-gnu/libzip.so.5")
     try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
     except:
