@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
+
 import logging
 import subprocess
 
@@ -19,9 +20,12 @@ def run_command(command):
 logging.info("شروع به‌روزرسانی پکیج‌ها")
 run_command('sudo apt update')
 
+# بررسی لیست پکیج‌های قابل ارتقا
+logging.info("بررسی پکیج‌های قابل ارتقا")
+run_command('apt list --upgradable')
+
 logging.info("نصب package-name")
 run_command('sudo apt install -y package-name')
-
 
 import subprocess, os, random, string, sys, shutil, socket, zipfile, urllib.request, urllib.error, urllib.parse, json, base64
 from itertools import cycle
