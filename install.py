@@ -74,14 +74,10 @@ def prepare(rType="MAIN"):
     if rType == "MAIN":
         printc("Install MariaDB 11.5 repository")
         os.system("apt-get install -y software-properties-common > /dev/null")
-        
-        # دانلود و اضافه کردن کلید GPG به روش جدید
         os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg > /dev/null")
         os.system("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list > /dev/null")
-        
         os.system("apt-get update > /dev/null")
         os.system("apt-get install -y mariadb-server > /dev/null")
-        
     for rPackage in rPackages:
         os.system(f"apt-get install -y {rPackage} > /dev/null")
         printc("Installing %s" % rPackage)
