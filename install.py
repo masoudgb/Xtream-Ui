@@ -75,7 +75,7 @@ def prepare(rType="MAIN"):
         printc("Install MariaDB 11.5 repository")
         os.system("apt-get install -y software-properties-common > /dev/null")
         os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg")
-        os.system("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] http://mirror.lstn.net/mariadb/repo/11.5/ubuntu focal main' | tee /etc/apt/sources.list.d/mariadb.list")
+        os.system("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list")
         os.system("apt-get update > /dev/null")
         os.system("apt-get install -y mariadb-server > /dev/null")
         
