@@ -1,6 +1,28 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-set -x
+import logging
+import subprocess
+
+# تنظیمات لاگ‌گیری
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+def run_command(command):
+    logging.info(f"اجرای دستور: {command}")
+    process = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    
+    if process.returncode == 0:
+        logging.info(f"خروجی: {stdout.decode()}")
+    else:
+        logging.error(f"خطا: {stderr.decode()}")
+
+logging.info("شروع به‌روزرسانی پکیج‌ها")
+run_command('sudo apt update')
+
+logging.info("نصب package-name")
+run_command('sudo apt install -y package-name')
+
+
 import subprocess, os, random, string, sys, shutil, socket, zipfile, urllib.request, urllib.error, urllib.parse, json, base64
 from itertools import cycle
 from zipfile import ZipFile
