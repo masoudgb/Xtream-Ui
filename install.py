@@ -77,53 +77,21 @@ def prepare(rType="MAIN"):
         os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg > /dev/null")
         os.system("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list > /dev/null")
         os.system("apt-get update > /dev/null")
-        os.system("apt-get install -y mariadb-server > /dev/null")
+        os.system("apt-get install -y mariadb-server > /dev/null"
     for rPackage in rPackages:
-        os.system(f"apt-get install -y {rPackage} > /dev/null")
         printc("Installing %s" % rPackage)
         os.system("apt-get install %s -y > /dev/null" % rPackage)
-    
-import os
-import subprocess
-
-def printc(message):
-    print(message)  # Assuming printc is a custom print function
-
-def prepare_pip_and_paramiko():
     printc("Installing pip2 and python2 paramiko")
-
-    # نصب Python 2
-    os.system("add-apt-repository universe > /dev/null 2>&1")
-    os.system("apt-get update > /dev/null 2>&1")
-    os.system("apt-get install -y python2 > /dev/null 2>&1")
-
-    # دانلود و نصب pip برای Python 2
-    os.system("curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py > /dev/null 2>&1")
-    os.system("python2 get-pip.py > /dev/null 2>&1")
-
-    # نصب Paramiko
-    os.system("pip2 install paramiko > /dev/null 2>&1")
-
-    # Clean up above
-    os.system("apt-get install -f > /dev/null")
-
-    # بررسی وجود کاربر xtreamcodes
+    os.system("add-apt-repository universe > /dev/null 2>&1 && curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py > /dev/null 2>&1 && python2 get-pip.py > /dev/null 2>&1 && pip2 install paramiko > /dev/null 2>&1")
+    os.system("apt-get install -f > /dev/null") # Clean up above
     try:
-        subprocess.check_output("getent passwd xtreamcodes > /dev/null", shell=True)
-    except subprocess.CalledProcessError:
-        # ایجاد کاربر
+        subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
+    except:
+        # Create User
         printc("Creating user xtreamcodes")
         os.system("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
-    
-    # ایجاد دایرکتوری /home/xtreamcodes در صورت عدم وجود
-    if not os.path.exists("/home/xtreamcodes"):
-        os.mkdir("/home/xtreamcodes")
-    
+    if not os.path.exists("/home/xtreamcodes"): os.mkdir("/home/xtreamcodes")
     return True
-
-# فراخوانی تابع برای اجرای نصب
-prepare_pip_and_paramiko()
-
 def install(rType="MAIN"):
     global rInstall, rDownloadURL
     printc("Downloading Software")
