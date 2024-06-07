@@ -82,17 +82,47 @@ def prepare(rType="MAIN"):
         os.system(f"apt-get install -y {rPackage} > /dev/null")
         printc("Installing %s" % rPackage)
         os.system("apt-get install %s -y > /dev/null" % rPackage)
+    
+import os
+import subprocess
+
+def printc(message):
+    print(message)  # Assuming printc is a custom print function
+
+def prepare_pip_and_paramiko():
     printc("Installing pip2 and python2 paramiko")
-    os.system("add-apt-repository universe > /dev/null 2>&1 && curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py > /dev/null 2>&1 && python2 get-pip.py > /dev/null 2>&1 && pip2 install paramiko > /dev/null 2>&1")
-    os.system("apt-get install -f > /dev/null") # Clean up above
+
+    # نصب Python 2
+    os.system("add-apt-repository universe > /dev/null 2>&1")
+    os.system("apt-get update > /dev/null 2>&1")
+    os.system("apt-get install -y python2 > /dev/null 2>&1")
+
+    # دانلود و نصب pip برای Python 2
+    os.system("curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py > /dev/null 2>&1")
+    os.system("python2 get-pip.py > /dev/null 2>&1")
+
+    # نصب Paramiko
+    os.system("pip2 install paramiko > /dev/null 2>&1")
+
+    # Clean up above
+    os.system("apt-get install -f > /dev/null")
+
+    # بررسی وجود کاربر xtreamcodes
     try:
-        subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
-    except:
-        # Create User
+        subprocess.check_output("getent passwd xtreamcodes > /dev/null", shell=True)
+    except subprocess.CalledProcessError:
+        # ایجاد کاربر
         printc("Creating user xtreamcodes")
         os.system("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
-    if not os.path.exists("/home/xtreamcodes"): os.mkdir("/home/xtreamcodes")
+    
+    # ایجاد دایرکتوری /home/xtreamcodes در صورت عدم وجود
+    if not os.path.exists("/home/xtreamcodes"):
+        os.mkdir("/home/xtreamcodes")
+    
     return True
+
+# فراخوانی تابع برای اجرای نصب
+prepare_pip_and_paramiko()
 
 def install(rType="MAIN"):
     global rInstall, rDownloadURL
