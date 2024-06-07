@@ -84,9 +84,13 @@ def prepare(rType="MAIN"):
     printc("Creating symlink for libzip")
     os.system("ln -s /usr/lib/x86_64-linux-gnu/libzip.so.4 /usr/lib/x86_64-linux-gnu/libzip.so.5")
     import subprocess
+    
     subprocess.run(["systemctl", "daemon-reload"])
+    
     try:
+    
     subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
+    
     except:
         # Create User
         printc("Creating user xtreamcodes")
