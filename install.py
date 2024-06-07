@@ -83,7 +83,8 @@ def prepare(rType="MAIN"):
         os.system(f"apt-get install -y {rPackage} > /dev/null")
     printc("Creating symlink for libzip")
     os.system("ln -s /usr/lib/x86_64-linux-gnu/libzip.so.4 /usr/lib/x86_64-linux-gnu/libzip.so.5")
-    try:
+    systemctl daemon-reload
+    #try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
     except:
         # Create User
