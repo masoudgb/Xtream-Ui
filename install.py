@@ -96,6 +96,7 @@ def prepare(rType="MAIN"):
         os.system("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
     if not os.path.exists("/home/xtreamcodes"): os.mkdir("/home/xtreamcodes")
     return True
+    
 def install(rType="MAIN"):
     global rInstall, rDownloadURL
     printc("Downloading Software")
