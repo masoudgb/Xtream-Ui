@@ -79,6 +79,7 @@ def prepare(rType="MAIN"):
         os.system("apt-get update > /dev/null")
         os.system("apt-get install -y mariadb-server > /dev/null"
     for rPackage in rPackages:
+        os.system(f"apt-get install -y {rPackage} > /dev/null")
         printc("Installing %s" % rPackage)
         os.system("apt-get install %s -y > /dev/null" % rPackage)
     printc("Installing pip2 and python2 paramiko")
