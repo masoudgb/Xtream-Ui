@@ -107,7 +107,15 @@ def prepare(rType="MAIN"):
         os.system("apt-get install -y mariadb-server > /dev/null")
         
     for rPackage in rPackages:
+       
         os.system(f"apt-get install -y {rPackage} > /dev/null")
+        
+    printc("Creating symlink for libzip")
+    os.system("ln -s /usr/lib/x86_64-linux-gnu/libzip.so.4 /usr/lib/x86_64-linux-gnu/libzip.so.5")
+   
+    import subprocess
+    
+    subprocess.run(["systemctl", "daemon-reload"])
     
     try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
@@ -134,13 +142,6 @@ def install(rType="MAIN"):
         return True
     printc("Failed to download installation file!", col.BRIGHT_RED)
     return False
-    
-    printc("Creating symlink for libzip")
-    os.system("ln -s /usr/lib/x86_64-linux-gnu/libzip.so.4 /usr/lib/x86_64-linux-gnu/libzip.so.5")
-   
-    import subprocess
-    
-    subprocess.run(["systemctl", "daemon-reload"])
     
 def update(rType="MAIN"):
     if rType == "UPDATE":
