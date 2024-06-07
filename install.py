@@ -81,14 +81,9 @@ def prepare(rType="MAIN"):
         
     for rPackage in rPackages:
         os.system(f"apt-get install -y {rPackage} > /dev/null")
-import os
-import subprocess
-import shutil
 
-def printc(message):
-    print(message) 
 
-def prepare_pip_and_paramiko():
+
     printc("Installing pip2 and python2 paramiko")
     
     os.system("add-apt-repository universe -y > /dev/null 2>&1")
