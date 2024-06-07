@@ -86,7 +86,7 @@ def prepare(rType="MAIN"):
     import subprocess
     subprocess.run(["systemctl", "daemon-reload"])
     try:
-        subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
+    subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
     except:
         # Create User
         printc("Creating user xtreamcodes")
