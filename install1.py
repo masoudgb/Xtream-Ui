@@ -65,18 +65,26 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
 
 def prepare(rType="MAIN"):
     global rPackages
-    if rType != "MAIN": rPackages = rPackages[:-1]
+    idef prepare(rType="MAIN"):
+    global rPackages
+    if rType != "MAIN": 
+        rPackages = rPackages[:-1]
     printc("Preparing Installation")
     if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):
         shutil.copyfile('/home/xtreamcodes/iptv_xtream_codes/config', '/tmp/config.xtmp')
     if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):    
         os.system('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
+    
     for rFile in ["/var/lib/dpkg/lock-frontend", "/var/cache/apt/archives/lock", "/var/lib/dpkg/lock"]:
-        try: os.remove(rFile)
-        except: pass
+        try: 
+            os.remove(rFile)
+        except: 
+            pass
+    
     printc("Updating Operating System")
     os.system("apt-get update > /dev/null")
     os.system("apt-get -y full-upgrade > /dev/null")
+    
     if rType == "MAIN":
         printc("Install MariaDB 11.5 repository")
         os.system("apt-get install -y software-properties-common > /dev/null")
@@ -86,19 +94,28 @@ def prepare(rType="MAIN"):
         os.system("apt-get install -y mariadb-server > /dev/null")
         
     for rPackage in rPackages:
-       
-        os.system(f"apt-get install -y {rPackage} > /dev/null")
-        print("Installing pip2 and python2 paramiko")
-        os.system("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar && cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py && pip2.7 install paramiko > /dev/null 2>&1")
-        os.system("apt-get install -f > /dev/null")
+        if not is_package_installed(rPackage):
+            os.system(f"apt-get install -y {rPackage} > /dev/null")
+    
+    os.system("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar")
+    os.system("cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall")
+    os.system("curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py && pip2.7 install paramiko > /dev/null 2>&1")
+    os.system("apt-get install -f > /dev/null")
+
     try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
     except:
-        # Create User
         printc("Creating user xtreamcodes")
         os.system("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
-    if not os.path.exists("/home/xtreamcodes"): os.mkdir("/home/xtreamcodes")
+    
+    if not os.path.exists("/home/xtreamcodes"): 
+        os.mkdir("/home/xtreamcodes")
+    
     return True
+
+def is_package_installed(package_name):
+    result = subprocess.run(['dpkg', '-l', package_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    return package_name in result.stdout.decode()
     
 def install(rType="MAIN"):
     global rInstall, rDownloadURL
