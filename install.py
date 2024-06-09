@@ -63,6 +63,10 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
     print("%s └─────────────────────────────────────────────────┘ %s" % (rColour, col.ENDC))
     print(" ")
 
+
+def printc(message):
+    print(message)
+
 def prepare(rType="MAIN"):
     global rPackages
     if rType != "MAIN":
@@ -86,7 +90,7 @@ def prepare(rType="MAIN"):
     os.system("apt-get update > /dev/null")
     os.system("apt-get -y full-upgrade > /dev/null")
 
-if rType == "MAIN":
+def install_mariadb():
     print("Install MariaDB 11.5 repository")
     
     # Install software-properties-common if not already installed
@@ -110,19 +114,21 @@ if rType == "MAIN":
     os.system("apt-get install -y mariadb-server")
 
     print("MariaDB 11.5 repository has been added and MariaDB server installed")
-    
+
+def install_packages():
     for rPackage in rPackages:
         printc("Installing %s" % rPackage)
         os.system("apt-get install %s -y > /dev/null" % rPackage)
 
     printc("Installing libssl1.1 & libzip5")
-    os.system("sudo apt update && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb && wget tar && wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb && sudo apt-get install -f > /dev/null 2>&1")
+    os.system("sudo apt update && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb && wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb && sudo apt-get install -f > /dev/null 2>&1")
     os.system("apt-get install -f > /dev/null")
     
     printc("Installing python2 & pip2 & paramiko")
     os.system("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar && cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py && pip2.7 install paramiko > /dev/null 2>&1")
     os.system("apt-get install -f > /dev/null") # Clean up above
-    
+
+def create_user():
     try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
     except:
@@ -132,8 +138,15 @@ if rType == "MAIN":
     
     if not os.path.exists("/home/xtreamcodes"):
         os.mkdir("/home/xtreamcodes")
-    
-    return True
+
+if __name__ == "__main__":
+    rType = "MAIN"  # Define rType or get it from arguments/environment/config
+    prepare(rType)
+    if rType == "MAIN":
+        install_mariadb()
+        install_packages()
+        create_user()
+        print("Setup completed successfully")
 
 def install(rType="MAIN"):
     global rInstall, rDownloadURL
