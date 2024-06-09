@@ -88,8 +88,6 @@ def prepare(rType="MAIN"):
     os.system("apt-get -y full-upgrade > /dev/null")
 
     if rType == "MAIN":
-    printc("Install MariaDB 11.5 repository")
-    if rType == "MAIN":
         printc("Install MariaDB 11.5 repository")
         os.system("apt-get install -y software-properties-common")
         os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-archive-keyring.gpg")
