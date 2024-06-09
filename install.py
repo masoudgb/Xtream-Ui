@@ -59,52 +59,66 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
 
 def prepare(rType="MAIN"):
     global rPackages
-    if rType != "MAIN": rPackages = rPackages[:-1]
+    if rType != "MAIN":
+        rPackages = rPackages[:-1]
+    
     printc("Preparing Installation")
+    
     if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):
         shutil.copyfile('/home/xtreamcodes/iptv_xtream_codes/config', '/tmp/config.xtmp')
+    
     if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):    
         os.system('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
+    
     for rFile in ["/var/lib/dpkg/lock-frontend", "/var/cache/apt/archives/lock", "/var/lib/dpkg/lock"]:
-        try: os.remove(rFile)
-        except: pass
+        try:
+            os.remove(rFile)
+        except:
+            pass
+    
     printc("Updating Operating System")
     os.system("apt-get update > /dev/null")
     os.system("apt-get -y full-upgrade > /dev/null")
 
     if rType == "MAIN":
-       printc("Install MariaDB 11.5 repository")
-       os.system("apt-get install -y software-properties-common")
-       os.system("apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8")
+        printc("Install MariaDB 11.5 repository")
+        os.system("apt-get install -y software-properties-common")
+        os.system("apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8")
         
-       # اجرای دستور اضافه کردن مخزن MariaDB و ارسال اینتر به صورت خودکار
-    process = subprocess.Popen(
-       ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"],
-       stdin=subprocess.PIPE,
-       stdout=subprocess.PIPE,
-       stderr=subprocess.PIPE,
-       text=True
-)
+        # اجرای دستور اضافه کردن مخزن MariaDB و ارسال اینتر به صورت خودکار
+        process = subprocess.Popen(
+            ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
 
-       # ارسال اینتر (کاراکتر '\n')
-       stdout, stderr = process.communicate(input='\n')
+        # ارسال اینتر (کاراکتر '\n')
+        stdout, stderr = process.communicate(input='\n')
 
-       print("Output:", stdout)
-       print("Error:", stderr)
-       os.system("apt-get update > /dev/null")
+        print("Output:", stdout)
+        print("Error:", stderr)
+        os.system("apt-get update > /dev/null")
+    
     for rPackage in rPackages:
         printc("Installing %s" % rPackage)
         os.system("apt-get install %s -y > /dev/null" % rPackage)
+    
     printc("Installing pip2 and python2 paramiko")
     os.system("add-apt-repository universe > /dev/null 2>&1 && curl https://bootstrap.pypa.io/get-pip.py --output get-pip.py > /dev/null 2>&1 && python2 get-pip.py > /dev/null 2>&1 && pip2 install paramiko > /dev/null 2>&1")
     os.system("apt-get install -f > /dev/null") # Clean up above
+    
     try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
     except:
         # Create User
         printc("Creating user xtreamcodes")
         os.system("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
-    if not os.path.exists("/home/xtreamcodes"): os.mkdir("/home/xtreamcodes")
+    
+    if not os.path.exists("/home/xtreamcodes"):
+        os.mkdir("/home/xtreamcodes")
+    
     return True
 
 def install(rType="MAIN"):
