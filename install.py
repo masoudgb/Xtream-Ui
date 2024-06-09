@@ -78,7 +78,7 @@ if rType == "MAIN":
     printc("Install MariaDB 11.5 repository")
     os.system("apt-get install -y software-properties-common")
     os.system("apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8")
-    os.system("add-apt-repository 'deb [arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main'")
+    os.system("add-apt-repository 'deb [arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' -y")
     pyautogui.press('enter')  # ارسال کلید Enter
     os.system("apt-get update > /dev/null")
     for rPackage in rPackages:
