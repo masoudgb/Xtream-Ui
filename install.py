@@ -74,8 +74,8 @@ def prepare(rType="MAIN"):
     if rType == "MAIN":
         print("Install MariaDB 11.5 repository")
         run_command("apt-get install -y software-properties-common > /dev/null")
-        run_command("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg")
-        run_command("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list")
+        run_command("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg > /dev/null")
+        run_command("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list > /dev/null")
         run_command("apt-get update > /dev/null")
         run_command("apt-get install -y mariadb-server > /dev/null")
     for rPackage in rPackages:
