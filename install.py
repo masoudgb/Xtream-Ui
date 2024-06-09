@@ -6,6 +6,7 @@ from zipfile import ZipFile
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
+del rDownloadURL["sub"]
 rDownloadURL = {"main": "https://bitbucket.org/xoceunder/x-ui/raw/master/main_xui_xoceunder.tar.gz", "sub": "https://bitbucket.org/xoceunder/x-ui/raw/master/sub_xui_xoceunder.tar.gz"}
 import os
 rPackages = ["libcurl4", "libxslt1-dev", "libgeoip-dev", "libonig-dev", "e2fsprogs", "wget", "mcrypt", "nscd", "htop", "zip", "unzip", "mc", "mariadb-server", "libpng16-16", "python3-paramiko", "python-is-python3"]
