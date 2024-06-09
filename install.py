@@ -86,22 +86,30 @@ def prepare(rType="MAIN"):
     os.system("apt-get update > /dev/null")
     os.system("apt-get -y full-upgrade > /dev/null")
 
-    if rType == "MAIN":
-        printc("Install MariaDB 11.5 repository")
-        os.system("apt-get install -y software-properties-common")
-        os.system("apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8")
-        process = subprocess.Popen(
-            ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+if rType == "MAIN":
+    print("Install MariaDB 11.5 repository")
+    
+    # Install software-properties-common if not already installed
+    os.system("apt-get install -y software-properties-common")
+    
+    # Create the keyring directory
+    os.system("sudo mkdir -p /etc/apt/keyrings")
+    
+    # Download and add the MariaDB GPG key to the keyring
+    os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | sudo gpg --dearmor -o /etc/apt/keyrings/mariadb.gpg")
+    
+    # Add the MariaDB repository with the new key
+    repo_line = "deb [arch=amd64,arm64,ppc64el,s390x signed-by=/etc/apt/keyrings/mariadb.gpg] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"
+    with open('/etc/apt/sources.list.d/mariadb.list', 'w') as repo_file:
+        repo_file.write(repo_line)
+    
+    # Update package list
+    os.system("apt-get update > /dev/null")
 
-        stdout, stderr = process.communicate(input='\n')
-        print("Output:", stdout)
-        print("Error:", stderr)
-        os.system("apt-get update > /dev/null")
+    # Optionally install MariaDB server
+    os.system("apt-get install -y mariadb-server")
+
+    print("MariaDB 11.5 repository has been added and MariaDB server installed")
     
     for rPackage in rPackages:
         printc("Installing %s" % rPackage)
