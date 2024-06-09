@@ -63,10 +63,6 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
     print("%s └─────────────────────────────────────────────────┘ %s" % (rColour, col.ENDC))
     print(" ")
 
-
-def printc(message):
-    print(message)
-
 def prepare(rType="MAIN"):
     global rPackages
     if rType != "MAIN":
@@ -90,45 +86,35 @@ def prepare(rType="MAIN"):
     os.system("apt-get update > /dev/null")
     os.system("apt-get -y full-upgrade > /dev/null")
 
-def install_mariadb():
-    print("Install MariaDB 11.5 repository")
-    
-    # Install software-properties-common if not already installed
-    os.system("apt-get install -y software-properties-common")
-    
-    # Create the keyring directory
-    os.system("sudo mkdir -p /etc/apt/keyrings")
-    
-    # Download and add the MariaDB GPG key to the keyring
-    os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | sudo gpg --dearmor -o /etc/apt/keyrings/mariadb.gpg")
-    
-    # Add the MariaDB repository with the new key
-    repo_line = "deb [arch=amd64,arm64,ppc64el,s390x signed-by=/etc/apt/keyrings/mariadb.gpg] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"
-    with open('/etc/apt/sources.list.d/mariadb.list', 'w') as repo_file:
-        repo_file.write(repo_line)
-    
-    # Update package list
-    os.system("apt-get update > /dev/null")
+    if rType == "MAIN":
+        printc("Install MariaDB 11.5 repository")
+        os.system("apt-get install -y software-properties-common")
+        os.system("apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8")
+        process = subprocess.Popen(
+            ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
 
-    # Optionally install MariaDB server
-    os.system("apt-get install -y mariadb-server")
-
-    print("MariaDB 11.5 repository has been added and MariaDB server installed")
-
-def install_packages():
+        stdout, stderr = process.communicate(input='\n')
+        print("Output:", stdout)
+        print("Error:", stderr)
+        os.system("apt-get update > /dev/null")
+    
     for rPackage in rPackages:
         printc("Installing %s" % rPackage)
         os.system("apt-get install %s -y > /dev/null" % rPackage)
 
     printc("Installing libssl1.1 & libzip5")
-    os.system("sudo apt update && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb && wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb && sudo apt-get install -f > /dev/null 2>&1")
+    os.system("sudo apt update && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb && wget tar && wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb && sudo apt-get install -f > /dev/null 2>&1")
     os.system("apt-get install -f > /dev/null")
     
     printc("Installing python2 & pip2 & paramiko")
     os.system("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar && cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py && pip2.7 install paramiko > /dev/null 2>&1")
     os.system("apt-get install -f > /dev/null") # Clean up above
-
-def create_user():
+    
     try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
     except:
@@ -138,15 +124,8 @@ def create_user():
     
     if not os.path.exists("/home/xtreamcodes"):
         os.mkdir("/home/xtreamcodes")
-
-if __name__ == "__main__":
-    rType = "MAIN"  # Define rType or get it from arguments/environment/config
-    prepare(rType)
-    if rType == "MAIN":
-        install_mariadb()
-        install_packages()
-        create_user()
-        print("Setup completed successfully")
+    
+    return True
 
 def install(rType="MAIN"):
     global rInstall, rDownloadURL
