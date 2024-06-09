@@ -72,12 +72,11 @@ def prepare(rType="MAIN"):
     os.system("apt-get update > /dev/null")
     os.system("apt-get -y full-upgrade > /dev/null")
     if rType == "MAIN":
-        print("Install MariaDB 11.5 repository")
-        run_command("apt-get install -y software-properties-common > /dev/null")
-        run_command("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg > /dev/null")
-        run_command("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list > /dev/null")
-        run_command("apt-get update > /dev/null")
-        run_command("apt-get install -y mariadb-server > /dev/null")
+        printc("Install MariaDB 10.5 repository")
+        os.system("apt-get install -y software-properties-common > /dev/null")
+        os.system("apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 >/dev/null 2>&1")
+        os.system("add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://mirror.lstn.net/mariadb/repo/10.5/ubuntu focal main'  > /dev/null")
+        os.system("apt-get update > /dev/null")
     for rPackage in rPackages:
         printc("Installing %s" % rPackage)
         os.system("apt-get install %s -y > /dev/null" % rPackage)
@@ -134,7 +133,7 @@ def update(rType="MAIN"):
             return False
         printc("Updating Software")
         os.system('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null && rm -rf /home/xtreamcodes/iptv_xtream_codes/admin > /dev/null && rm -rf /home/xtreamcodes/iptv_xtream_codes/pytools > /dev/null && unzip /tmp/update.zip -d /tmp/update/ > /dev/null && cp -rf /tmp/update/XtreamUI-master/* /home/xtreamcodes/iptv_xtream_codes/ > /dev/null && rm -rf /tmp/update/XtreamUI-master > /dev/null && rm -rf /tmp/update > /dev/null && chown -R xtreamcodes:xtreamcodes /home/xtreamcodes/ > /dev/null && chmod +x /home/xtreamcodes/iptv_xtream_codes/permissions.sh > /dev/null && chattr +i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
-        if not "sudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config" in open("/home/xtreamcodes/iptv_xtream_codes/permissions.sh").read(): os.system('echo "#!/bin/bash\nsudo chmod -R 777 /home/xtreamcodes 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type f -exec chmod 644 {} \\; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type d -exec chmod 755 {} \\; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type f -exec chmod 644 {} \\; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type d -exec chmod 755 {} \\; 2>/dev/null\nsudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx/sbin/nginx 2>/dev/null\nsudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx_rtmp/sbin/nginx_rtmp 2>/dev/null\nsudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config 2>/dev/null" > /home/xtreamcodes/iptv_xtream_codes/permissions.sh')
+        if not "sudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config" in open("/home/xtreamcodes/iptv_xtream_codes/permissions.sh").read(): os.system('echo "#!/bin/bash\nsudo chmod -R 777 /home/xtreamcodes 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type f -exec chmod 644 {} \; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type d -exec chmod 755 {} \; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type f -exec chmod 644 {} \; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type d -exec chmod 755 {} \; 2>/dev/null\nsudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx/sbin/nginx 2>/dev/null\nsudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx_rtmp/sbin/nginx_rtmp 2>/dev/null\nsudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config 2>/dev/null" > /home/xtreamcodes/iptv_xtream_codes/permissions.sh')
         os.system("/home/xtreamcodes/iptv_xtream_codes/permissions.sh > /dev/null")
         try: os.remove("/tmp/update.zip")
         except: pass
@@ -254,9 +253,9 @@ if __name__ == "__main__":
     try: rVersion = os.popen('lsb_release -sr').read().strip()
     except: rVersion = None
     if not rVersion in rVersions:
-        printc("Unsupported Operating System, Works only on Ubuntu Server 24")
+        printc("Unsupported Operating System, Works only on Ubuntu Server 20")
         sys.exit(1)
-    printc("Xtream-UI Ubuntu %s Installer - Masoud Gb" % rVersion, col.GREEN, 2)
+    printc("X-UI 22f Ubuntu %s Installer - XoceUnder" % rVersion, col.GREEN, 2)
     print(" ")
     rType = input("  Installation Type [MAIN, LB, UPDATE]: ")
     print(" ")
@@ -269,4 +268,44 @@ if __name__ == "__main__":
             print(" ")
         else:
             rHost = "127.0.0.1"
-         
+            rPassword = generate()
+            rServerID = 1
+        rUsername = "user_iptvpro"
+        rDatabase = "xtream_iptvpro"
+        rPort = 7999
+        if len(rHost) > 0 and len(rPassword) > 0 and rServerID > -1:
+            printc("Start installation? Y/N", col.BRIGHT_YELLOW)
+            if input("  ").upper() == "Y":
+                print(" ")
+                rRet = prepare(rType.upper())
+                if not install(rType.upper()): sys.exit(1)
+                if rType.upper() == "MAIN":
+                    if not mysql(rUsername, rPassword): sys.exit(1)
+                encrypt(rHost, rUsername, rPassword, rDatabase, rServerID, rPort)
+                configure()
+                if rType.upper() == "MAIN": 
+                    modifyNginx()
+                    update(rType.upper())
+                start()
+                printc("Installation completed!", col.GREEN, 2)
+                if rType.upper() == "MAIN":
+                    printc("Please store your MySQL password: %s" % rPassword, col.BRIGHT_YELLOW)
+                    printc("Admin UI Wan IP: http://%s:25500" % getIP(), col.BRIGHT_YELLOW)
+                    printc("Admin UI default login is admin/admin", col.BRIGHT_YELLOW)
+                    printc("Save Credentials is file to /root/credentials.txt", col.BRIGHT_YELLOW)
+                    rFile = open("/root/credentials.txt", "w")
+                    rFile.write("MySQL password: %s\n" % rPassword)
+                    rFile.write("Admin UI Wan IP: http://%s:25500\n" % getIP())
+                    rFile.write("Admin UI default login is admin/admin\n")
+                    rFile.close()
+            else: printc("Installation cancelled", col.BRIGHT_RED)
+        else: printc("Invalid entries", col.BRIGHT_RED)
+    elif rType.upper() == "UPDATE":
+        if os.path.exists("/home/xtreamcodes/iptv_xtream_codes/wwwdir/api.php"):
+            printc("Update Admin Panel? Y/N?", col.BRIGHT_YELLOW)
+            if input("  ").upper() == "Y":
+                if not update(rType.upper()): sys.exit(1)
+                printc("Installation completed!", col.GREEN, 2)
+                start()
+            else: printc("Install Xtream Codes Main first!", col.BRIGHT_RED)
+    else: printc("Invalid installation type", col.BRIGHT_RED)
