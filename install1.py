@@ -63,61 +63,85 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
     print("%s └─────────────────────────────────────────────────┘ %s" % (rColour, col.ENDC))
     print(" ")
 
+def run_command(command):
+    try:
+        subprocess.run(command, check=True, shell=True)
+    except subprocess.CalledProcessError as e:
+        print(f"Command failed: {command}")
+        print(e)
+        return False
+    return True
+
 def prepare(rType="MAIN"):
     global rPackages
-    if rType != "MAIN": rPackages = rPackages[:-1]
-    printc("Preparing Installation")
-    if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):
-        shutil.copyfile('/home/xtreamcodes/iptv_xtream_codes/config', '/tmp/config.xtmp')
-    if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):    
-        os.system('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
+    if rType != "MAIN":
+        rPackages = rPackages[:-1]
+    
+    print("Preparing Installation")
+    config_path = '/home/xtreamcodes/iptv_xtream_codes/config'
+    if os.path.isfile(config_path):
+        shutil.copyfile(config_path, '/tmp/config.xtmp')
+    
+    if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb'):
+        run_command('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
+    
     for rFile in ["/var/lib/dpkg/lock-frontend", "/var/cache/apt/archives/lock", "/var/lib/dpkg/lock"]:
-        try: os.remove(rFile)
-        except: pass
-    printc("Updating Operating System")
-    os.system("apt-get update > /dev/null")
-    os.system("apt-get -y full-upgrade > /dev/null")
+        try:
+            os.remove(rFile)
+        except:
+            pass
+    
+    print("Updating Operating System")
+    run_command("apt-get update > /dev/null")
+    run_command("apt-get -y full-upgrade > /dev/null")
+    
     if rType == "MAIN":
-        printc("Install MariaDB 11.5 repository")
-        os.system("apt-get install -y software-properties-common > /dev/null")
-        os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg")
-        os.system("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list")
-        os.system("apt-get update > /dev/null")
-        os.system("apt-get install -y mariadb-server > /dev/null")
+        print("Install MariaDB 11.5 repository")
+        run_command("apt-get install -y software-properties-common > /dev/null")
+        run_command("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg")
+        run_command("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list")
+        run_command("apt-get update > /dev/null")
+        run_command("apt-get install -y mariadb-server > /dev/null")
         
     for rPackage in rPackages:
-       
-        os.system(f"apt-get install -y {rPackage} > /dev/null")
+        run_command(f"apt-get install -y {rPackage} > /dev/null")
         print("Installing pip2 and python2 paramiko")
-        os.system("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar && cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py && pip2.7 install paramiko > /dev/null 2>&1")
-        os.system("apt-get install -f > /dev/null")
+        run_command("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar && cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py && pip2.7 install paramiko > /dev/null 2>&1")
+        run_command("apt-get install -f > /dev/null")
+    
     try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
-    except:
-        # Create User
-        printc("Creating user xtreamcodes")
-        os.system("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
-    if not os.path.exists("/home/xtreamcodes"): os.mkdir("/home/xtreamcodes")
-    return True
-    def is_package_installed(package_name):
-    result = subprocess.run(['dpkg', '-l', package_name], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    return package_name in result.stdout.decode()
+    except subprocess.CalledProcessError:
+        print("Creating user xtreamcodes")
+        run_command("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
     
+    if not os.path.exists("/home/xtreamcodes"):
+        os.mkdir("/home/xtreamcodes")
+    
+    return True
+
 def install(rType="MAIN"):
     global rInstall, rDownloadURL
-    printc("Downloading Software")
-    try: rURL = rDownloadURL[rInstall[rType]]
-    except:
-        printc("Invalid download URL!", col.BRIGHT_RED)
+    print("Downloading Software")
+    try:
+        rURL = rDownloadURL[rInstall[rType]]
+    except KeyError:
+        print("Invalid download URL!")
         return False
-    os.system('wget -q -O "/tmp/xtreamcodes.tar.gz" "%s"' % rURL)
-    if os.path.exists("/tmp/xtreamcodes.tar.gz"):
-        printc("Installing Software")
-        os.system('tar -zxvf "/tmp/xtreamcodes.tar.gz" -C "/home/xtreamcodes/" > /dev/null')
-        try: os.remove("/tmp/xtreamcodes.tar.gz")
-        except: pass
-        return True
-    printc("Failed to download installation file!", col.BRIGHT_RED)
+    
+    if run_command(f'wget -q -O "/tmp/xtreamcodes.tar.gz" "{rURL}"'):
+        print("Installing Software")
+        if run_command('tar -zxvf "/tmp/xtreamcodes.tar.gz" -C "/home/xtreamcodes/" > /dev/null'):
+            try:
+                os.remove("/tmp/xtreamcodes.tar.gz")
+            except:
+                pass
+            return True
+        else:
+            print("Failed to extract installation file!")
+    else:
+        print("Failed to download installation file!")
+    
     return False
     
 def update(rType="MAIN"):
@@ -262,4 +286,61 @@ def modifyNginx():
 
 if __name__ == "__main__":
     try: rVersion = os.popen('lsb_release -sr').read().strip()
-    except:
+    except: rVersion = None
+    if not rVersion in rVersions:
+        printc("Unsupported Operating System, Works only on Ubuntu Server 24")
+        sys.exit(1)
+    printc("X-UI 22f Ubuntu %s Installer - Masoud Gb" % rVersion, col.GREEN, 2)
+    print(" ")
+    rType = input("  Installation Type [MAIN, LB, UPDATE]: ")
+    print(" ")
+    if rType.upper() in ["MAIN", "LB"]:
+        if rType.upper() == "LB":
+            rHost = input("  Main Server IP Address: ")
+            rPassword = input("  MySQL Password: ")
+            try: rServerID = int(input("  Load Balancer Server ID: "))
+            except: rServerID = -1
+            print(" ")
+        else:
+            rHost = "127.0.0.1"
+            rPassword = generate()
+            rServerID = 1
+        rUsername = "user_iptvpro"
+        rDatabase = "xtream_iptvpro"
+        rPort = 7999
+        if len(rHost) > 0 and len(rPassword) > 0 and rServerID > -1:
+            printc("Start installation? Y/N", col.BRIGHT_YELLOW)
+            if input("  ").upper() == "Y":
+                print(" ")
+                rRet = prepare(rType.upper())
+                if not install(rType.upper()): sys.exit(1)
+                if rType.upper() == "MAIN":
+                    if not mysql(rUsername, rPassword): sys.exit(1)
+                encrypt(rHost, rUsername, rPassword, rDatabase, rServerID, rPort)
+                configure()
+                if rType.upper() == "MAIN": 
+                    modifyNginx()
+                    update(rType.upper())
+                start()
+                printc("Installation completed!", col.GREEN, 2)
+                if rType.upper() == "MAIN":
+                    printc("Please store your MySQL password: %s" % rPassword, col.BRIGHT_YELLOW)
+                    printc("Admin UI Wan IP: http://%s:25500" % getIP(), col.BRIGHT_YELLOW)
+                    printc("Admin UI default login is admin/admin", col.BRIGHT_YELLOW)
+                    printc("Save Credentials is file to /root/credentials.txt", col.BRIGHT_YELLOW)
+                    rFile = open("/root/credentials.txt", "w")
+                    rFile.write("MySQL password: %s\n" % rPassword)
+                    rFile.write("Admin UI Wan IP: http://%s:25500\n" % getIP())
+                    rFile.write("Admin UI default login is admin/admin\n")
+                    rFile.close()
+            else: printc("Installation cancelled", col.BRIGHT_RED)
+        else: printc("Invalid entries", col.BRIGHT_RED)
+    elif rType.upper() == "UPDATE":
+        if os.path.exists("/home/xtreamcodes/iptv_xtream_codes/wwwdir/api.php"):
+            printc("Update Admin Panel? Y/N?", col.BRIGHT_YELLOW)
+            if input("  ").upper() == "Y":
+                if not update(rType.upper()): sys.exit(1)
+                printc("Installation completed!", col.GREEN, 2)
+                start()
+            else: printc("Install Xtream Codes Main first!", col.BRIGHT_RED)
+    else: printc("Invalid installation type", col.BRIGHT_RED)
