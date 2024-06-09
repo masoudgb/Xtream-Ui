@@ -76,8 +76,21 @@ def prepare(rType="MAIN"):
        printc("Install MariaDB 11.5 repository")
        os.system("apt-get install -y software-properties-common")
        os.system("apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8")
-       os.system("add-apt-repository 'deb [arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main'")
-       subprocess.run(['xdotool', 'key', 'Return']) 
+        
+# اجرای دستور اضافه کردن مخزن MariaDB و ارسال اینتر به صورت خودکار
+process = subprocess.Popen(
+    ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"],
+    stdin=subprocess.PIPE,
+    stdout=subprocess.PIPE,
+    stderr=subprocess.PIPE,
+    text=True
+)
+
+# ارسال اینتر (کاراکتر '\n')
+stdout, stderr = process.communicate(input='\n')
+
+print("Output:", stdout)
+print("Error:", stderr)
        os.system("apt-get update > /dev/null")
     for rPackage in rPackages:
         printc("Installing %s" % rPackage)
