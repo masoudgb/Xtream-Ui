@@ -245,7 +245,7 @@ def modifyNginx():
     rPrevData = open(rPath, "r").read()
     if not "listen 25500;" in rPrevData:
         shutil.copy(rPath, "%s.xc" % rPath)
-        rData = "}".join(rPrevData.split("}")[:-1]) + "    server {\n        listen 25500;\n        index index.php index.html index.htm;\n        root /home/xtreamcodes/iptv_xtream_codes/admin/;\n\n        location ~ \\\\.php$ {\n            limit_req zone=one burst=8;\n            try_files $uri =404;\n            fastcgi_index index.php;\n            fastcgi_pass php;\n            include fastcgi_params;\n            fastcgi_buffering on;\n            fastcgi_buffers 96 32k;\n            fastcgi_buffer_size 32k;\n            fastcgi_max_temp_file_size 0;\n            fastcgi_keep_conn on;\n            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n            fastcgi_param SCRIPT_NAME $fastcgi_script_name;\n        }\n    }\n}"
+        rData = "}".join(rPrevData.split("}")[:-1]) + "    server {\n        listen 25500;\n        index index.php index.html index.htm;\n        root /home/xtreamcodes/iptv_xtream_codes/admin/;\n\n        location ~ \.php$ {\n			limit_req zone=one burst=8;\n            try_files $uri =404;\n			fastcgi_index index.php;\n			fastcgi_pass php;\n			include fastcgi_params;\n			fastcgi_buffering on;\n			fastcgi_buffers 96 32k;\n			fastcgi_buffer_size 32k;\n			fastcgi_max_temp_file_size 0;\n			fastcgi_keep_conn on;\n			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\n			fastcgi_param SCRIPT_NAME $fastcgi_script_name;\n        }\n    }\n}"
         rFile = open(rPath, "w")
         rFile.write(rData)
         rFile.close()
