@@ -108,8 +108,7 @@ def prepare(rType="MAIN"):
         os.system("apt-get install %s -y > /dev/null" % rPackage)
 
     printc("Installing libssl1.1 & libzip5")
-    os.system("sudo apt update && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb && wget tar && wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb && sudo apt-get install -f > /dev/null 2>&1")
-    os.system("apt-get install -f > /dev/null")
+    os.system("sudo apt update && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb && wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb && sudo apt-get install -f -y > /dev/null 2>&1")
     
     printc("Installing python2 & pip2 & paramiko")
     os.system("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar && cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py && pip2.7 install paramiko > /dev/null 2>&1")
