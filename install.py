@@ -87,22 +87,22 @@ def prepare(rType="MAIN"):
     os.system("apt-get -y full-upgrade > /dev/null")
 
     if rType == "MAIN":
-        printc("Install MariaDB 11.5 repository")
-        os.system("apt-get install -y software-properties-common")
-        os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-archive-keyring.gpg")
-        process = subprocess.Popen(
-            ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] [signed-by=/usr/share/keyrings/mariadb-archive-keyring.gpg] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            text=True
-        )
+    printc("Install MariaDB 11.5 repository")
+    os.system("apt-get install -y software-properties-common")
+    os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-archive-keyring.gpg")
+    process = subprocess.Popen(
+        ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] [signed-by=/usr/share/keyrings/mariadb-archive-keyring.gpg] http://archive.ubuntu.com/ubuntu noble main"],
+        stdin=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        text=True
+    )
 
-        stdout, stderr = process.communicate(input='\n')
-        print("Output:", stdout)
-        print("Error:", stderr)
-        os.system("apt-get update > /dev/null")
-        
+    stdout, stderr = process.communicate(input='\n')
+    print("Output:", stdout)
+    print("Error:", stderr)
+    os.system("apt-get update > /dev/null")
+    
     for rPackage in rPackages:
         printc("Installing %s" % rPackage)
         os.system("apt-get install %s -y > /dev/null" % rPackage)
