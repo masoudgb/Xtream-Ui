@@ -72,12 +72,11 @@ def prepare(rType="MAIN"):
     os.system("apt-get update > /dev/null")
     os.system("apt-get -y full-upgrade > /dev/null")
     if rType == "MAIN":
-        print("Install MariaDB 11.5 repository")
-        run_command("apt-get install -y software-properties-common > /dev/null")
-        run_command("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg > /dev/null")
-        run_command("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list > /dev/null")
-        run_command("apt-get update > /dev/null")
-        run_command("apt-get install -y mariadb-server > /dev/null")
+        printc("Install MariaDB 10.5 repository")
+        os.system("apt-get install -y software-properties-common > /dev/null")
+        os.system("apt-key adv --recv-keys --keyserver hkp://keyserver.ubuntu.com:80 0xF1656F24C74CD1D8 >/dev/null 2>&1")
+        os.system("add-apt-repository 'deb [arch=amd64,arm64,ppc64el] http://mirror.lstn.net/mariadb/repo/10.5/ubuntu focal main'  > /dev/null")
+        os.system("apt-get update > /dev/null")
     for rPackage in rPackages:
         printc("Installing %s" % rPackage)
         os.system("apt-get install %s -y > /dev/null" % rPackage)
