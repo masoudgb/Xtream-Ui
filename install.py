@@ -7,7 +7,6 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 rDownloadURL = {"main": "https://bitbucket.org/xoceunder/x-ui/raw/master/main_xui_xoceunder.tar.gz", "sub": "https://bitbucket.org/xoceunder/x-ui/raw/master/sub_xui_xoceunder.tar.gz"}
-del rDownloadURL["sub"]
 import os
 rPackages = ["libcurl4", "libxslt1-dev", "libgeoip-dev", "libonig-dev", "e2fsprogs", "wget", "mcrypt", "nscd", "htop", "zip", "unzip", "mc", "mariadb-server", "libpng16-16", "python3-paramiko", "python-is-python3"]
 install_commands = [
@@ -95,13 +94,11 @@ def prepare(rType="MAIN"):
             ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] [signed-by=/usr/share/keyrings/mariadb-archive-keyring.gpg] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"],
             stdin=subprocess.PIPE,
             stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
             text=True
         )
 
         stdout, stderr = process.communicate(input='\n')
         print("Output:", stdout)
-        print("Error:", stderr)
         os.system("apt-get update > /dev/null")
         
     for rPackage in rPackages:
