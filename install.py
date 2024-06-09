@@ -63,10 +63,6 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
     print("%s └─────────────────────────────────────────────────┘ %s" % (rColour, col.ENDC))
     print(" ")
 
-def prepare(rType="MAIN"):
-import os
-import shutil
-import subprocess
 def run_command(command):
     try:
         subprocess.run(command, check=True, shell=True)
