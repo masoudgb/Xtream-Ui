@@ -300,14 +300,12 @@ def modifyNginx():
             fastcgi_param SCRIPT_NAME $fastcgi_script_name;
         }
     }
-}
 """
-        rData = rPrevData.rstrip("}") + new_server_block
+        rData = rPrevData.replace("}", new_server_block + "}", 1)
         
         with open(rPath, "w") as rFile:
             rFile.write(rData)
-
-
+            
 if __name__ == "__main__":
     try: rVersion = os.popen('lsb_release -sr').read().strip()
     except: rVersion = None
