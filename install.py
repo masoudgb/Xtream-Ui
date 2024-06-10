@@ -184,6 +184,7 @@ def mysql(rUsername, rPassword):
         rFile = open("/etc/mysql/my.cnf", "wb")
         rFile.write(rMySQLCnf)
         rFile.close()
+        os.system("systemctl daemon-reload > /dev/null")
         os.system("systemctl restart mariadb > /dev/null")
     #printc("Enter MySQL Root Password:", col.BRIGHT_RED)
     for i in range(5):
