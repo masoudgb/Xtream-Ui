@@ -272,11 +272,12 @@ def start(first=True):
     os.system("/home/xtreamcodes/iptv_xtream_codes/start_services.sh > /dev/null")
     
 def modifyNginx():
-    print("Modifying Nginx")
+
+    printc("Modifying Nginx")
     rPath = "/home/xtreamcodes/iptv_xtream_codes/nginx/conf/nginx.conf"
     rPrevData = open(rPath, "r").read()
 
-    if not "listen 25500;" in rPrevData:
+    if "listen 25500;" not in rPrevData:
         shutil.copy(rPath, f"{rPath}.xc")
 
         new_server_block = """
@@ -300,18 +301,18 @@ def modifyNginx():
             fastcgi_param SCRIPT_NAME $fastcgi_script_name;
         }
     }
-}
 """
 
         http_start_index = rPrevData.find("http {")
         if http_start_index != -1:
-            # محل پایان بخش http را پیدا کنید
+            # پیدا کردن آخرین بسته شدن براکت } در داخل بخش http
             http_end_index = rPrevData.rfind("}", http_start_index)
-            rData = rPrevData[:http_end_index] + new_server_block + rPrevData[http_end_index:]
+            # اطمینان حاصل کردن از اینکه بخش http به درستی بسته شده است
+            rData = rPrevData[:http_end_index] + new_server_block + "\n}" + rPrevData[http_end_index+1:]
 
             with open(rPath, "w") as rFile:
                 rFile.write(rData)
-                
+
 # اجرای تابع
 modifyNginx()
 
