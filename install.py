@@ -270,7 +270,7 @@ def start(first=True):
     if first: printc("Starting Xtream Codes")
     else: printc("Restarting Xtream Codes")
     os.system("/home/xtreamcodes/iptv_xtream_codes/start_services.sh > /dev/null")
-
+    
 def modifyNginx():
     printc("Modifying Nginx")
     rPath = "/home/xtreamcodes/iptv_xtream_codes/nginx/conf/nginx.conf"
@@ -301,11 +301,17 @@ def modifyNginx():
         }
     }
 """
-        rData = rPrevData.replace("}", new_server_block + "}", 1)
-        
-        with open(rPath, "w") as rFile:
-            rFile.write(rData)
+
+        http_index = rPrevData.find("http {")
+        if http_index != -1:
+            http_end_index = rPrevData.find("}", http_index)
+            rData = rPrevData[:http_end_index] + new_server_block + rPrevData[http_end_index:]
             
+            with open(rPath, "w") as rFile:
+                rFile.write(rData)
+
+modifyNginx()
+
 if __name__ == "__main__":
     try: rVersion = os.popen('lsb_release -sr').read().strip()
     except: rVersion = None
