@@ -272,7 +272,7 @@ def start(first=True):
     os.system("/home/xtreamcodes/iptv_xtream_codes/start_services.sh > /dev/null")
     
 def modifyNginx():
-    printc("Modifying Nginx")
+    print("Modifying Nginx")
     rPath = "/home/xtreamcodes/iptv_xtream_codes/nginx/conf/nginx.conf"
     rPrevData = open(rPath, "r").read()
 
@@ -280,36 +280,39 @@ def modifyNginx():
         shutil.copy(rPath, f"{rPath}.xc")
 
         new_server_block = """
-        server {
-            listen 25500;
-            index index.php index.html index.htm;
-            root /home/xtreamcodes/iptv_xtream_codes/admin/;
+    server {
+        listen 25500;
+        index index.php index.html index.htm;
+        root /home/xtreamcodes/iptv_xtream_codes/admin/;
 
-            location ~ \\.php$ {
-                limit_req zone=one burst=8;
-                try_files $uri =404;
-                fastcgi_index index.php;
-                fastcgi_pass php;
-                include fastcgi_params;
-                fastcgi_buffering on;
-                fastcgi_buffers 96 32k;
-                fastcgi_buffer_size 32k;
-                fastcgi_max_temp_file_size 0;
-                fastcgi_keep_conn on;
-                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
-                fastcgi_param SCRIPT_NAME $fastcgi_script_name;
-            }
+        location ~ \\.php$ {
+            limit_req zone=one burst=8;
+            try_files $uri =404;
+            fastcgi_index index.php;
+            fastcgi_pass php;
+            include fastcgi_params;
+            fastcgi_buffering on;
+            fastcgi_buffers 96 32k;
+            fastcgi_buffer_size 32k;
+            fastcgi_max_temp_file_size 0;
+            fastcgi_keep_conn on;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param SCRIPT_NAME $fastcgi_script_name;
         }
-        """
+    }
+}
+"""
 
-        http_index = rPrevData.find("http {")
-        if http_index != -1:
-            http_end_index = rPrevData.find("}", http_index)
+        http_start_index = rPrevData.find("http {")
+        if http_start_index != -1:
+            # محل پایان بخش http را پیدا کنید
+            http_end_index = rPrevData.rfind("}", http_start_index)
             rData = rPrevData[:http_end_index] + new_server_block + rPrevData[http_end_index:]
 
             with open(rPath, "w") as rFile:
                 rFile.write(rData)
-
+                
+# اجرای تابع
 modifyNginx()
 
 if __name__ == "__main__":
