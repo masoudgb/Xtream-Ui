@@ -271,15 +271,42 @@ def start(first=True):
     os.system("/home/xtreamcodes/iptv_xtream_codes/start_services.sh > /dev/null")
 
 def modifyNginx():
-    printc("Modifying Nginx")
+    import shutil
+    print("Modifying Nginx")
     rPath = "/home/xtreamcodes/iptv_xtream_codes/nginx/conf/nginx.conf"
     rPrevData = open(rPath, "r").read()
+    
     if not "listen 25500;" in rPrevData:
-        shutil.copy(rPath, "%s.xc" % rPath)
-        rData = "}".join(rPrevData.split("}")[:-1]) + "    server {\\n        listen 25500;\\n        index index.php index.html index.htm;\\n        root /home/xtreamcodes/iptv_xtream_codes/admin/;\\n\\n        location ~ \\.php$ {\\n			limit_req zone=one burst=8;\\n            try_files $uri =404;\\n			fastcgi_index index.php;\\n			fastcgi_pass php;\\n			include fastcgi_params;\\n			fastcgi_buffering on;\\n			fastcgi_buffers 96 32k;\\n			fastcgi_buffer_size 32k;\\n			fastcgi_max_temp_file_size 0;\\n			fastcgi_keep_conn on;\\n			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\\n			fastcgi_param SCRIPT_NAME $fastcgi_script_name;\\n        }\\n    }\\n}"
-        rFile = open(rPath, "w")
-        rFile.write(rData)
-        rFile.close()
+        shutil.copy(rPath, f"{rPath}.xc")
+        
+        new_server_block = """
+    server {
+        listen 25500;
+        index index.php index.html index.htm;
+        root /home/xtreamcodes/iptv_xtream_codes/admin/;
+
+        location ~ \\.php$ {
+            limit_req zone=one burst=8;
+            try_files $uri =404;
+            fastcgi_index index.php;
+            fastcgi_pass php;
+            include fastcgi_params;
+            fastcgi_buffering on;
+            fastcgi_buffers 96 32k;
+            fastcgi_buffer_size 32k;
+            fastcgi_max_temp_file_size 0;
+            fastcgi_keep_conn on;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        }
+    }
+}
+"""
+        rData = rPrevData.rstrip("}") + new_server_block
+        
+        with open(rPath, "w") as rFile:
+            rFile.write(rData)
+
 
 if __name__ == "__main__":
     try: rVersion = os.popen('lsb_release -sr').read().strip()
