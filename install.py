@@ -6,7 +6,7 @@ from zipfile import ZipFile
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
-rDownloadURL = {"main": "https://bitbucket.org/xoceunder/x-ui/raw/master/main_xui_xoceunder.tar.gz", "sub": "https://bitbucket.org/xoceunder/x-ui/raw/master/sub_xui_xoceunder.tar.gz"}
+rDownloadURL = {"main": "https://bitbucket.org/masoudgb/xtream-ui/src/master/main_xui_masoudgb.tar.gz", "sub": "https://bitbucket.org/masoudgb/xtream-ui/src/master/sub_xui_masoudgb.tar.gz"}
 import os
 rPackages = ["libcurl4", "libxslt1-dev", "libgeoip-dev", "libonig-dev", "e2fsprogs", "wget", "mcrypt", "nscd", "htop", "zip", "unzip", "mc", "mariadb-server", "libpng16-16", "python3-paramiko", "python-is-python3"]
 rInstall = {"MAIN": "main", "LB": "sub"}
@@ -166,7 +166,7 @@ def update(rType="MAIN"):
         printc("Enter the link of release_xyz.zip file:", col.BRIGHT_RED)
         rlink = input('Example: https://bitbucket.org/xoceunder/x-ui/raw/master/release_22f.zip\n\nNow enter the link:\n\n')
     else:
-        rlink = "https://bitbucket.org/xoceunder/x-ui/raw/master/release_22f.zip"
+        rlink = "https://bitbucket.org/masoudgb/xtream-ui/raw/2a4967618393304f72975533e1d42fa8b76c0547/release_22f.zip"
         printc("Downloading Software Update")  
     os.system('wget -q -O "/tmp/update.zip" "%s"' % rlink)
     if os.path.exists("/tmp/update.zip"):
