@@ -63,25 +63,28 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
     print("%s └─────────────────────────────────────────────────┘ %s" % (rColour, col.ENDC))
     print(" ")
 
+def is_installed(package_name):
+    return os.system(f"dpkg -s {package_name} > /dev/null 2>&1") == 0
+
 def prepare(rType="MAIN"):
     global rPackages
     if rType != "MAIN":
         rPackages = rPackages[:-1]
-    
+
     printc("Preparing Installation")
-    
+
     if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):
         shutil.copyfile('/home/xtreamcodes/iptv_xtream_codes/config', '/tmp/config.xtmp')
-    
+
     if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):    
         os.system('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
-    
+
     for rFile in ["/var/lib/dpkg/lock-frontend", "/var/cache/apt/archives/lock", "/var/lib/dpkg/lock"]:
         try:
             os.remove(rFile)
         except:
             pass
-    
+
     printc("Updating Operating System")
     os.system("apt-get update > /dev/null")
     os.system("apt-get -y full-upgrade > /dev/null")
@@ -96,32 +99,54 @@ def prepare(rType="MAIN"):
             stdout=subprocess.PIPE,
             text=True
         )
-
         stdout, stderr = process.communicate(input='\n')
         print("Output:", stdout)
         os.system("apt-get update > /dev/null")
-        
-    for rPackage in rPackages:
-        printc("Installing %s" % rPackage)
-        os.system("apt-get install %s -y > /dev/null" % rPackage)
 
-    printc("Installing libssl1.1 & libzip5")
-    os.system("sudo apt update && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb && wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb && sudo apt-get install -f -y > /dev/null 2>&1")
-    
-    printc("Installing python2 & pip2 & paramiko")
-    os.system("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar && cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py && pip2.7 install paramiko > /dev/null 2>&1")
-    os.system("apt-get install -f > /dev/null") # Clean up above
-    
+    for rPackage in rPackages:
+        if not is_installed(rPackage):
+            printc(f"Installing {rPackage}")
+            os.system(f"apt-get install {rPackage} -y > /dev/null")
+
+    if not is_installed("libssl1.1"):
+        printc("Installing libssl1.1")
+        os.system("wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb")
+
+    if not is_installed("libzip5"):
+        printc("Installing libzip5")
+        os.system("wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb")
+
+    os.system("sudo apt-get install -f -y > /dev/null 2>&1")
+
+    python_installed = is_installed("python2.7")
+    pip_installed = os.system("pip2.7 --version > /dev/null 2>&1") == 0
+    paramiko_installed = os.system("pip2.7 show paramiko > /dev/null 2>&1") == 0
+
+    if not python_installed or not pip_installed or not paramiko_installed:
+        printc("Installing python2 & pip2 & paramiko")
+        os.system("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar")
+
+        if not python_installed:
+            os.system("cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall")
+
+        if not pip_installed:
+            os.system("curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py")
+
+        if not paramiko_installed:
+            os.system("pip2.7 install paramiko > /dev/null 2>&1")
+
+    os.system("apt-get install -f > /dev/null")  # Clean up above
+
     try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
     except:
         # Create User
         printc("Creating user xtreamcodes")
         os.system("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
-    
+
     if not os.path.exists("/home/xtreamcodes"):
         os.mkdir("/home/xtreamcodes")
-    
+
     return True
 
 def install(rType="MAIN"):
@@ -260,6 +285,7 @@ def configure():
     os.system("mount -a")
     os.system("chmod 0700 /home/xtreamcodes/iptv_xtream_codes/config > /dev/null")
     os.system("sed -i 's|echo \"Xtream Codes Reborn\";|header(\"Location: https://www.google.com/\");|g' /home/xtreamcodes/iptv_xtream_codes/wwwdir/index.php")
+    os.system("systemctl daemon-reload > /dev/null")
     if not "api.xtream-codes.com" in open("/etc/hosts").read(): os.system('echo "127.0.0.1    api.xtream-codes.com" >> /etc/hosts')
     if not "downloads.xtream-codes.com" in open("/etc/hosts").read(): os.system('echo "127.0.0.1    downloads.xtream-codes.com" >> /etc/hosts')
     if not "xtream-codes.com" in open("/etc/hosts").read(): os.system('echo "127.0.0.1    xtream-codes.com" >> /etc/hosts')
@@ -269,17 +295,48 @@ def start(first=True):
     if first: printc("Starting Xtream Codes")
     else: printc("Restarting Xtream Codes")
     os.system("/home/xtreamcodes/iptv_xtream_codes/start_services.sh > /dev/null")
-
+    
 def modifyNginx():
+
     printc("Modifying Nginx")
     rPath = "/home/xtreamcodes/iptv_xtream_codes/nginx/conf/nginx.conf"
     rPrevData = open(rPath, "r").read()
-    if not "listen 25500;" in rPrevData:
-        shutil.copy(rPath, "%s.xc" % rPath)
-        rData = "}".join(rPrevData.split("}")[:-1]) + "    server {\\n        listen 25500;\\n        index index.php index.html index.htm;\\n        root /home/xtreamcodes/iptv_xtream_codes/admin/;\\n\\n        location ~ \\.php$ {\\n			limit_req zone=one burst=8;\\n            try_files $uri =404;\\n			fastcgi_index index.php;\\n			fastcgi_pass php;\\n			include fastcgi_params;\\n			fastcgi_buffering on;\\n			fastcgi_buffers 96 32k;\\n			fastcgi_buffer_size 32k;\\n			fastcgi_max_temp_file_size 0;\\n			fastcgi_keep_conn on;\\n			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\\n			fastcgi_param SCRIPT_NAME $fastcgi_script_name;\\n        }\\n    }\\n}"
-        rFile = open(rPath, "w")
-        rFile.write(rData)
-        rFile.close()
+
+    if "listen 25500;" not in rPrevData:
+        shutil.copy(rPath, f"{rPath}.xc")
+
+        new_server_block = """
+    server {
+        listen 25500;
+        index index.php index.html index.htm;
+        root /home/xtreamcodes/iptv_xtream_codes/admin/;
+
+        location ~ \\.php$ {
+            limit_req zone=one burst=8;
+            try_files $uri =404;
+            fastcgi_index index.php;
+            fastcgi_pass php;
+            include fastcgi_params;
+            fastcgi_buffering on;
+            fastcgi_buffers 96 32k;
+            fastcgi_buffer_size 32k;
+            fastcgi_max_temp_file_size 0;
+            fastcgi_keep_conn on;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            fastcgi_param SCRIPT_NAME $fastcgi_script_name;
+        }
+    }
+"""
+
+        http_start_index = rPrevData.find("http {")
+        if http_start_index != -1:
+            # پیدا کردن آخرین بسته شدن براکت } در داخل بخش http
+            http_end_index = rPrevData.rfind("}", http_start_index)
+            # اطمینان حاصل کردن از اینکه بخش http به درستی بسته شده است
+            rData = rPrevData[:http_end_index] + new_server_block + "\n}" + rPrevData[http_end_index+1:]
+
+            with open(rPath, "w") as rFile:
+                rFile.write(rData)
 
 if __name__ == "__main__":
     try: rVersion = os.popen('lsb_release -sr').read().strip()
