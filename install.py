@@ -313,9 +313,6 @@ def modifyNginx():
             with open(rPath, "w") as rFile:
                 rFile.write(rData)
 
-# اجرای تابع
-modifyNginx()
-
 if __name__ == "__main__":
     try: rVersion = os.popen('lsb_release -sr').read().strip()
     except: rVersion = None
