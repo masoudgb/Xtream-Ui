@@ -1,6 +1,5 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-
 import subprocess, os, random, string, sys, shutil, socket, zipfile, urllib.request, urllib.error, urllib.parse, json, base64
 from itertools import cycle
 from zipfile import ZipFile
@@ -8,6 +7,7 @@ from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 rDownloadURL = {"main": "https://bitbucket.org/xoceunder/x-ui/raw/master/main_xui_xoceunder.tar.gz", "sub": "https://bitbucket.org/xoceunder/x-ui/raw/master/sub_xui_xoceunder.tar.gz"}
+import os
 rPackages = ["libcurl4", "libxslt1-dev", "libgeoip-dev", "libonig-dev", "e2fsprogs", "wget", "mcrypt", "nscd", "htop", "zip", "unzip", "mc", "mariadb-server", "libpng16-16", "python3-paramiko", "python-is-python3"]
 install_commands = [
     "wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb",
@@ -63,27 +63,18 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
     print("%s └─────────────────────────────────────────────────┘ %s" % (rColour, col.ENDC))
     print(" ")
 
-def run_command(command):
-    try:
-        subprocess.run(command, check=True, shell=True)
-    except subprocess.CalledProcessError as e:
-        print(f"Command failed: {command}")
-        print(e)
-        return False
-    return True
-
 def prepare(rType="MAIN"):
     global rPackages
     if rType != "MAIN":
         rPackages = rPackages[:-1]
     
-    print("Preparing Installation")
-    config_path = '/home/xtreamcodes/iptv_xtream_codes/config'
-    if os.path.isfile(config_path):
-        shutil.copyfile(config_path, '/tmp/config.xtmp')
+    printc("Preparing Installation")
     
-    if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb'):
-        run_command('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
+    if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):
+        shutil.copyfile('/home/xtreamcodes/iptv_xtream_codes/config', '/tmp/config.xtmp')
+    
+    if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):    
+        os.system('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
     
     for rFile in ["/var/lib/dpkg/lock-frontend", "/var/cache/apt/archives/lock", "/var/lib/dpkg/lock"]:
         try:
@@ -91,29 +82,42 @@ def prepare(rType="MAIN"):
         except:
             pass
     
-    print("Updating Operating System")
-    run_command("apt-get update > /dev/null")
-    run_command("apt-get -y full-upgrade > /dev/null")
-    
+    printc("Updating Operating System")
+    os.system("apt-get update > /dev/null")
+    os.system("apt-get -y full-upgrade > /dev/null")
+
     if rType == "MAIN":
-        print("Install MariaDB 11.5 repository")
-        run_command("apt-get install -y software-properties-common > /dev/null")
-        run_command("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-keyring.gpg")
-        run_command("echo 'deb [signed-by=/usr/share/keyrings/mariadb-keyring.gpg arch=amd64,arm64,ppc64el,s390x] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' | tee /etc/apt/sources.list.d/mariadb.list")
-        run_command("apt-get update > /dev/null")
-        run_command("apt-get install -y mariadb-server > /dev/null")
+        printc("Install MariaDB 11.5 repository")
+        os.system("apt-get install -y software-properties-common")
+        os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-archive-keyring.gpg")
+        process = subprocess.Popen(
+            ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] [signed-by=/usr/share/keyrings/mariadb-archive-keyring.gpg] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"],
+            stdin=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            text=True
+        )
+
+        stdout, stderr = process.communicate(input='\n')
+        print("Output:", stdout)
+        os.system("apt-get update > /dev/null")
         
     for rPackage in rPackages:
-        run_command(f"apt-get install -y {rPackage} > /dev/null")
-        print("Installing pip2 and python2 paramiko")
-        run_command("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar && cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py && pip2.7 install paramiko > /dev/null 2>&1")
-        run_command("apt-get install -f > /dev/null")
+        printc("Installing %s" % rPackage)
+        os.system("apt-get install %s -y > /dev/null" % rPackage)
+
+    printc("Installing libssl1.1 & libzip5")
+    os.system("sudo apt update && wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb && wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb && sudo apt-get install -f -y > /dev/null 2>&1")
+    
+    printc("Installing python2 & pip2 & paramiko")
+    os.system("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar && cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall && curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py && pip2.7 install paramiko > /dev/null 2>&1")
+    os.system("apt-get install -f > /dev/null") # Clean up above
     
     try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
-    except subprocess.CalledProcessError:
-        print("Creating user xtreamcodes")
-        run_command("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
+    except:
+        # Create User
+        printc("Creating user xtreamcodes")
+        os.system("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
     
     if not os.path.exists("/home/xtreamcodes"):
         os.mkdir("/home/xtreamcodes")
@@ -122,28 +126,21 @@ def prepare(rType="MAIN"):
 
 def install(rType="MAIN"):
     global rInstall, rDownloadURL
-    print("Downloading Software")
-    try:
-        rURL = rDownloadURL[rInstall[rType]]
-    except KeyError:
-        print("Invalid download URL!")
+    printc("Downloading Software")
+    try: rURL = rDownloadURL[rInstall[rType]]
+    except:
+        printc("Invalid download URL!", col.BRIGHT_RED)
         return False
-    
-    if run_command(f'wget -q -O "/tmp/xtreamcodes.tar.gz" "{rURL}"'):
-        print("Installing Software")
-        if run_command('tar -zxvf "/tmp/xtreamcodes.tar.gz" -C "/home/xtreamcodes/" > /dev/null'):
-            try:
-                os.remove("/tmp/xtreamcodes.tar.gz")
-            except:
-                pass
-            return True
-        else:
-            print("Failed to extract installation file!")
-    else:
-        print("Failed to download installation file!")
-    
+    os.system('wget -q -O "/tmp/xtreamcodes.tar.gz" "%s"' % rURL)
+    if os.path.exists("/tmp/xtreamcodes.tar.gz"):
+        printc("Installing Software")
+        os.system('tar -zxvf "/tmp/xtreamcodes.tar.gz" -C "/home/xtreamcodes/" > /dev/null')
+        try: os.remove("/tmp/xtreamcodes.tar.gz")
+        except: pass
+        return True
+    printc("Failed to download installation file!", col.BRIGHT_RED)
     return False
-    
+
 def update(rType="MAIN"):
     if rType == "UPDATE":
         printc("Enter the link of release_xyz.zip file:", col.BRIGHT_RED)
@@ -202,7 +199,7 @@ def mysql(rUsername, rPassword):
                 os.system("mysql -u root%s xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql > /dev/null" % rExtra)
                 os.system('mysql -u root%s -e "USE xtream_iptvpro; UPDATE settings SET live_streaming_pass = \'%s\', unique_id = \'%s\', crypt_load_balancing = \'%s\';" > /dev/null' % (rExtra, generate(20), generate(10), generate(20)))
                 os.system('mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO streaming_servers (id, server_name, domain_name, server_ip, vpn_ip, ssh_password, ssh_port, diff_time_main, http_broadcast_port, total_clients, system_os, network_interface, latency, status, enable_geoip, geoip_countries, last_check_ago, can_delete, server_hardware, total_services, persistent_connections, rtmp_port, geoip_type, isp_names, isp_type, enable_isp, boost_fpm, http_ports_add, network_guaranteed_speed, https_broadcast_port, https_ports_add, whitelist_ips, watchdog_data, timeshift_only) VALUES (1, \'Main Server\', \'\', \'%s\', \'\', NULL, NULL, 0, 25461, 1000, \'%s\', \'eth0\', 0, 1, 0, \'\', 0, 0, \'{}\', 3, 0, 25462, \'low_priority\', \'\', \'low_priority\', 0, 1, \'\', 1000, 25463, \'\', \'[\"127.0.0.1\",\"\"]\', \'{}\', 0);" > /dev/null' % (rExtra, getIP(), getVersion()))
-                os.system('mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO reg_users (id, username, password, email, member_group_id, verified, status) VALUES (1, \'admin\', \'\\$6\\$rounds=20000\\$xtreamcodes\\$XThC5OwfuS0YwS4ahiifzF14vkGbGsFF1w7ETL4sRRC5sOrAWCjWvQJDromZUQoQuwbAXAFdX3h3Cp3vqulpS0\', \'admin@website.com\', 1, 1, 1);" > /dev/null' % rExtra)
+                os.system('mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO reg_users (id, username, password, email, member_group_id, verified, status) VALUES (1, \'admin\', \'\\$6\\$rounds=20000\\$xtreamcodes\\$XThC5OwfuS0YwS4ahiifzF14vkGbGsFF1w7ETL4sRRC5sOrAWCjWvQJDromZUQoQuwbAXAFdX3h3Cp3vqulpS0\', \'admin@website.com\', 1, 1, 1);" > /dev/null'  % rExtra)
                 os.system('mysql -u root%s -e "CREATE USER \'%s\'@\'%%\' IDENTIFIED BY \'%s\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'%s\'@\'%%\' WITH GRANT OPTION; GRANT SELECT, LOCK TABLES ON *.* TO \'%s\'@\'%%\';FLUSH PRIVILEGES;" > /dev/null' % (rExtra, rUsername, rPassword, rUsername, rUsername))
                 os.system('mysql -u root%s -e "USE xtream_iptvpro; CREATE TABLE IF NOT EXISTS dashboard_statistics (id int(11) NOT NULL AUTO_INCREMENT, type varchar(16) NOT NULL DEFAULT \'\', time int(16) NOT NULL DEFAULT \'0\', count int(16) NOT NULL DEFAULT \'0\', PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=latin1; INSERT INTO dashboard_statistics (type, time, count) VALUES(\'conns\', UNIX_TIMESTAMP(), 0),(\'users\', UNIX_TIMESTAMP(), 0);\" > /dev/null' % rExtra)
             try: os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
@@ -279,7 +276,7 @@ def modifyNginx():
     rPrevData = open(rPath, "r").read()
     if not "listen 25500;" in rPrevData:
         shutil.copy(rPath, "%s.xc" % rPath)
-        rData = "}".join(rPrevData.split("}")[:-1]) + "    server {\n        listen 25500;\n        index index.php index.html index.htm;\n        root /home/xtreamcodes/iptv_xtream_codes/admin/;\n\n        location ~ \\.php$ {\n			limit_req zone=one burst=8;\n            try_files $uri =404;\n			fastcgi_index index.php;\n			fastcgi_pass php;\n			include fastcgi_params;\n			fastcgi_buffering on;\n			fastcgi_buffers 96 32k;\n			fastcgi_buffer_size 32k;\n			fastcgi_max_temp_file_size 0;\n			fastcgi_keep_conn on;\n			fastcgi_param SCRIPT_FILENAME $document_root\\$fastcgi_script_name;\n			fastcgi_param SCRIPT_NAME \\$fastcgi_script_name;\n        }\n    }\n}"
+        rData = "}".join(rPrevData.split("}")[:-1]) + "    server {\\n        listen 25500;\\n        index index.php index.html index.htm;\\n        root /home/xtreamcodes/iptv_xtream_codes/admin/;\\n\\n        location ~ \\.php$ {\\n			limit_req zone=one burst=8;\\n            try_files $uri =404;\\n			fastcgi_index index.php;\\n			fastcgi_pass php;\\n			include fastcgi_params;\\n			fastcgi_buffering on;\\n			fastcgi_buffers 96 32k;\\n			fastcgi_buffer_size 32k;\\n			fastcgi_max_temp_file_size 0;\\n			fastcgi_keep_conn on;\\n			fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;\\n			fastcgi_param SCRIPT_NAME $fastcgi_script_name;\\n        }\\n    }\\n}"
         rFile = open(rPath, "w")
         rFile.write(rData)
         rFile.close()
@@ -288,9 +285,9 @@ if __name__ == "__main__":
     try: rVersion = os.popen('lsb_release -sr').read().strip()
     except: rVersion = None
     if not rVersion in rVersions:
-        printc("Unsupported Operating System, Works only on Ubuntu Server 24")
+        printc("Unsupported Operating System, Works only on Ubuntu Server 20")
         sys.exit(1)
-    printc("X-UI 22f Ubuntu %s Installer - Masoud Gb" % rVersion, col.GREEN, 2)
+    printc("X-UI 22f Ubuntu %s Installer - XoceUnder" % rVersion, col.GREEN, 2)
     print(" ")
     rType = input("  Installation Type [MAIN, LB, UPDATE]: ")
     print(" ")
