@@ -105,7 +105,7 @@ def prepare(rType="MAIN"):
 
     if not is_installed("libssl1.1"):
         printc("Installing libssl1.1")
-        os.system("wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb")
+        os.system("wget https://old-releases.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.0-dev_1.0.2g-1ubuntu11.4_amd64.deb && sudo dpkg -i libssl1.0-dev_1.0.2g-1ubuntu11.4_amd64.deb)
 
     if not is_installed("libzip5"):
         printc("Installing libzip5")
