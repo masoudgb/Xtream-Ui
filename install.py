@@ -170,7 +170,7 @@ def update(rType="MAIN"):
         printc("Enter the link of release_xyz.zip file:", col.BRIGHT_RED)
         rlink = input('Example: https://bitbucket.org/xoceunder/x-ui/raw/master/release_22f.zip\n\nNow enter the link:\n\n')
     else:
-        rlink = "https://bitbucket.org/xoceunder/x-ui/raw/master/release_22f.zip"
+        rlink = "https://bitbucket.org/emre1393/xtreamui_mirror/downloads/release_22f.zip"
         printc("Downloading Software Update")  
     os.system('wget -q -O "/tmp/update.zip" "%s"' % rlink)
     if os.path.exists("/tmp/update.zip"):
@@ -329,9 +329,7 @@ def modifyNginx():
 
         http_start_index = rPrevData.find("http {")
         if http_start_index != -1:
-            # پیدا کردن آخرین بسته شدن براکت } در داخل بخش http
             http_end_index = rPrevData.rfind("}", http_start_index)
-            # اطمینان حاصل کردن از اینکه بخش http به درستی بسته شده است
             rData = rPrevData[:http_end_index] + new_server_block + "\n}" + rPrevData[http_end_index+1:]
 
             with open(rPath, "w") as rFile:
@@ -341,9 +339,9 @@ if __name__ == "__main__":
     try: rVersion = os.popen('lsb_release -sr').read().strip()
     except: rVersion = None
     if not rVersion in rVersions:
-        printc("Unsupported Operating System, Works only on Ubuntu Server 20")
+        printc("Unsupported Operating System, Works only on Ubuntu Server 24.04")
         sys.exit(1)
-    printc("X-UI 22f Ubuntu %s Installer - XoceUnder" % rVersion, col.GREEN, 2)
+    printc("X-UI 22f & ck41 installer in Ubuntu %s - Create By Masoud Gb" % rVersion, col.GREEN, 2)
     print(" ")
     rType = input("  Installation Type [MAIN, LB, UPDATE]: ")
     print(" ")
