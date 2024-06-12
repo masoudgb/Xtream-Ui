@@ -341,7 +341,7 @@ if __name__ == "__main__":
     if not rVersion in rVersions:
         printc("Unsupported Operating System, Works only on Ubuntu Server 24.04")
         sys.exit(1)
-    printc("X-UI 22f & ck41 installer in Ubuntu %s - Create By Masoud Gb" % rVersion, col.GREEN, 2)
+    printc("X-UI 22f & ck41 installer in Ubuntu %s /nCreate By Masoud Gb" % rVersion, col.GREEN, 2)
     print(" ")
     rType = input("  Installation Type [MAIN, LB, UPDATE]: ")
     print(" ")
