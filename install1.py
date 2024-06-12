@@ -124,7 +124,7 @@ def prepare(rType="MAIN"):
 
     if not python_installed or not pip_installed or not paramiko_installed:
         printc("Installing python2 & pip2 & paramiko")
-        subprocess.run("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar > /dev/null 2>&1", shell=True)
+        subprocess.run("sudo apt update > /dev/null 2> && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar > /dev/null 2>&1", shell=True)
 
         if not python_installed:
             subprocess.run("cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz > /dev/null 2>&1 && sudo tar xzf Python-2.7.18.tgz > /dev/null 2>&1 && cd Python-2.7.18 && sudo ./configure --enable-optimizations > /dev/null 2>&1 && sudo make altinstall > /dev/null 2>&1", shell=True)
