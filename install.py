@@ -92,10 +92,14 @@ def prepare(rType="MAIN"):
         printc("Install MariaDB 11.5 repository")
         subprocess.run("apt-get install -y software-properties-common > /dev/null 2>&1", shell=True)
         subprocess.run("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-archive-keyring.gpg > /dev/null 2>&1", shell=True)
-        subprocess.run(
-            "sudo add-apt-repository -y 'deb [arch=amd64,arm64,ppc64el,s390x] [signed-by=/usr/share/keyrings/mariadb-archive-keyring.gpg] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' > /dev/null 2>&1",
-            shell=True
+        
+        repository_cmd = (
+            "sudo add-apt-repository -y "
+            "'deb [arch=amd64,arm64,ppc64el,s390x] [signed-by=/usr/share/keyrings/mariadb-archive-keyring.gpg] "
+            "https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' > /dev/null 2>&1"
         )
+        subprocess.run(repository_cmd, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
         subprocess.run("apt-get update -y > /dev/null 2>&1", shell=True)
 
     for rPackage in rPackages:
