@@ -60,72 +60,6 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
 
 def is_installed(package_name):
     try:
-        subprocess.check_output(['dpkg', '-s', package_name], stderr=subprocess.STDOUT)
-        return True
-    except subprocess.CalledProcessError:
-        return False
-def prepare(rType="MAIN"):
-    global rPackages
-    if rType != "MAIN":
-        rPackages = rPackages[:-1]
-
-    printc("Preparing Installation")
-
-    if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):
-        shutil.copyfile('/home/xtreamcodes/iptv_xtream_codes/config', '/tmp/config.xtmp')
-
-    if os.path.isfile('/home/xtreamcodes/iptv_xtream_codes/config'):    
-        os.system('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
-
-    for rFile in ["/var/lib/dpkg/lock-frontend", "/var/cache/apt/archives/lock", "/var/lib/dpkg/lock"]:
-        try:
-            os.remove(rFile)
-        except FileNotFoundError:
-            pass
-
-    printc("Updating Operating System")
-    os.system("apt-get update > /dev/null")
-    os.system("apt-get -y full-upgrade > /dev/null")
-
-    if rType == "MAIN":
-        printc("Install MariaDB 11.5 repository")
-        os.system("apt-get install -y software-properties-common > /dev/null")
-        os.system("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-archive-keyring.gpg > /dev/null")
-        process = subprocess.Popen(
-            ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] [signed-by=/usr/share/keyrings/mariadb-archive-keyring.gpg] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main > /dev/null"],
-            stdin=subprocess.PIPE,
-            text=True
-        )
-        os.system("apt-get update > /dev/null")
-
-    for rPackage in rPackages:
-        if not is_installed(rPackage):
-            printc(f"Installing {rPackage}")
-            os.system(f"apt-get install {rPackage} -y > /dev/null")
-
-    if not is_installed("libssl1.1"):
-        printc("Installing libssl1.1")
-        os.system("wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb > /dev/null")
-
-    if not is_installed("libzip5"):
-        printc("Installing libzip5")
-        os.system("wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb > /dev/null")
-
-    os.system("sudo apt-get install -f -y > /dev/null 2>&1")
-
-    python_installed = is_installed("python2.7")
-    pip_installed = os.system("pip2.7 --version > /dev/null 2>&1") == 0
-    paramiko_installed = os.system("pip2.7 show paramiko > /dev/null 2>&1") == 0
-
-    if not python_installed or not pip_installed or not paramiko_installed:
-        printc("Installing python2 & pip2 & paramiko")
-        os.system("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar > /dev/null")
-
-        if not python_installed:
-            os.system("cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall > /dev/null")
-
-def is_installed(package_name):
-    try:
         subprocess.run(['dpkg', '-s', package_name], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         return True
     except subprocess.CalledProcessError:
@@ -151,62 +85,58 @@ def prepare(rType="MAIN"):
             pass
 
     printc("Updating Operating System")
-    subprocess.run("apt-get update -y", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    subprocess.run("apt-get -y full-upgrade", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.run("apt-get update -y > /dev/null 2>&1", shell=True)
+    subprocess.run("apt-get -y full-upgrade > /dev/null 2>&1", shell=True)
 
     if rType == "MAIN":
         printc("Install MariaDB 11.5 repository")
-        subprocess.run("apt-get install -y software-properties-common", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        subprocess.run("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-archive-keyring.gpg", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        process = subprocess.Popen(
-            ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] [signed-by=/usr/share/keyrings/mariadb-archive-keyring.gpg] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main"],
-            stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            text=True
+        subprocess.run("apt-get install -y software-properties-common > /dev/null 2>&1", shell=True)
+        subprocess.run("curl -fsSL https://mariadb.org/mariadb_release_signing_key.asc | gpg --dearmor -o /usr/share/keyrings/mariadb-archive-keyring.gpg > /dev/null 2>&1", shell=True)
+        subprocess.run(
+            "sudo add-apt-repository -y 'deb [arch=amd64,arm64,ppc64el,s390x] [signed-by=/usr/share/keyrings/mariadb-archive-keyring.gpg] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main' > /dev/null 2>&1",
+            shell=True
         )
-        stdout, stderr = process.communicate(input='\n')
-        print("Output:", stdout)
-        subprocess.run("apt-get update -y", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run("apt-get update -y > /dev/null 2>&1", shell=True)
 
     for rPackage in rPackages:
         if not is_installed(rPackage):
             printc(f"Installing {rPackage}")
-            subprocess.run(f"apt-get install {rPackage} -y", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run(f"apt-get install {rPackage} -y > /dev/null 2>&1", shell=True)
 
     if not is_installed("libssl1.1"):
         printc("Installing libssl1.1")
-        subprocess.run("wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run("wget http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.0g-2ubuntu4_amd64.deb > /dev/null 2>&1 && sudo dpkg -i libssl1.1_1.1.0g-2ubuntu4_amd64.deb > /dev/null 2>&1", shell=True)
 
     if not is_installed("libzip5"):
         printc("Installing libzip5")
-        subprocess.run("wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run("wget http://archive.ubuntu.com/ubuntu/pool/universe/libz/libzip/libzip5_1.5.1-0ubuntu1_amd64.deb > /dev/null 2>&1 && sudo dpkg -i libzip5_1.5.1-0ubuntu1_amd64.deb > /dev/null 2>&1", shell=True)
 
-    subprocess.run("sudo apt-get install -f -y", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.run("sudo apt-get install -f -y > /dev/null 2>&1", shell=True)
 
     python_installed = is_installed("python2.7")
-    pip_installed = subprocess.run("pip2.7 --version", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode == 0
-    paramiko_installed = subprocess.run("pip2.7 show paramiko", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE).returncode == 0
+    pip_installed = subprocess.run("pip2.7 --version > /dev/null 2>&1", shell=True).returncode == 0
+    paramiko_installed = subprocess.run("pip2.7 show paramiko > /dev/null 2>&1", shell=True).returncode == 0
 
     if not python_installed or not pip_installed or not paramiko_installed:
         printc("Installing python2 & pip2 & paramiko")
-        subprocess.run("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run("sudo apt update && sudo apt upgrade -y && sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar > /dev/null 2>&1", shell=True)
 
         if not python_installed:
-            subprocess.run("cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz && sudo tar xzf Python-2.7.18.tgz && cd Python-2.7.18 && sudo ./configure --enable-optimizations && sudo make altinstall", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run("cd /usr/src && sudo wget https://www.python.org/ftp/python/2.7.18/Python-2.7.18.tgz > /dev/null 2>&1 && sudo tar xzf Python-2.7.18.tgz > /dev/null 2>&1 && cd Python-2.7.18 && sudo ./configure --enable-optimizations > /dev/null 2>&1 && sudo make altinstall > /dev/null 2>&1", shell=True)
 
         if not pip_installed:
-            subprocess.run("curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py && sudo python2.7 get-pip.py", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run("curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py > /dev/null 2>&1 && sudo python2.7 get-pip.py > /dev/null 2>&1", shell=True)
 
         if not paramiko_installed:
-            subprocess.run("pip2.7 install paramiko", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            subprocess.run("pip2.7 install paramiko > /dev/null 2>&1", shell=True)
 
-    subprocess.run("apt-get install -f -y", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    subprocess.run("apt-get install -f -y > /dev/null 2>&1", shell=True)
 
     try:
-        subprocess.run("getent passwd xtreamcodes", shell=True, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run("getent passwd xtreamcodes > /dev/null 2>&1", shell=True, check=True)
     except subprocess.CalledProcessError:
         printc("Creating user xtreamcodes")
-        subprocess.run("adduser --system --shell /bin/false --group --disabled-login xtreamcodes", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.run("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null 2>&1", shell=True)
 
     if not os.path.exists("/home/xtreamcodes"):
         os.mkdir("/home/xtreamcodes")
