@@ -124,7 +124,6 @@ def prepare(rType="MAIN"):
 
     if not python_installed or not pip_installed or not paramiko_installed:
         printc("Installing python2 & pip2 & paramiko")
-        subprocess.run("sudo apt update && sudo apt upgrade -y > /dev/null 2>&1", shell=True)
         subprocess.run("sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev wget tar > /dev/null 2>&1", shell=True)
 
         if not python_installed:
