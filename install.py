@@ -64,10 +64,6 @@ def is_installed(package_name):
         return True
     except subprocess.CalledProcessError:
         return False
-
-def printc(message):
-    print(message)
-
 def prepare(rType="MAIN"):
     global rPackages
     if rType != "MAIN":
