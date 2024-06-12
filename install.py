@@ -59,7 +59,14 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
     print(" ")
 
 def is_installed(package_name):
-    return os.system(f"dpkg -s {package_name} > /dev/null 2>&1") == 0
+    try:
+        subprocess.check_output(['dpkg', '-s', package_name], stderr=subprocess.STDOUT)
+        return True
+    except subprocess.CalledProcessError:
+        return False
+
+def printc(message):
+    print(message)
 
 def prepare(rType="MAIN"):
     global rPackages
@@ -77,7 +84,7 @@ def prepare(rType="MAIN"):
     for rFile in ["/var/lib/dpkg/lock-frontend", "/var/cache/apt/archives/lock", "/var/lib/dpkg/lock"]:
         try:
             os.remove(rFile)
-        except:
+        except FileNotFoundError:
             pass
 
     printc("Updating Operating System")
@@ -134,7 +141,7 @@ def prepare(rType="MAIN"):
 
     try:
         subprocess.check_output("getent passwd xtreamcodes > /dev/null".split())
-    except:
+    except subprocess.CalledProcessError:
         # Create User
         printc("Creating user xtreamcodes")
         os.system("adduser --system --shell /bin/false --group --disabled-login xtreamcodes > /dev/null")
