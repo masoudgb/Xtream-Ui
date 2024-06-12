@@ -94,7 +94,6 @@ def prepare(rType="MAIN"):
         process = subprocess.Popen(
             ["sudo", "add-apt-repository", "deb [arch=amd64,arm64,ppc64el,s390x] [signed-by=/usr/share/keyrings/mariadb-archive-keyring.gpg] https://mirrors.xtom.com/mariadb/repo/11.5/ubuntu noble main > /dev/null"],
             stdin=subprocess.PIPE,
-            stdout=subprocess.PIPE,
             text=True
         )
         stdout, stderr = process.communicate(input='\n')
