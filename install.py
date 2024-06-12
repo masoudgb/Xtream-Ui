@@ -96,7 +96,6 @@ def prepare(rType="MAIN"):
             stdin=subprocess.PIPE,
             text=True
         )
-        stdout, stderr = process.communicate(input='\n')
         os.system("apt-get update > /dev/null")
 
     for rPackage in rPackages:
