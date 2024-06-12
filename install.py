@@ -254,7 +254,6 @@ def decrypt():
 
 def configure():
     printc("Configuring System")
-        os.system("systemctl daemon-reload > /dev/null")
     if not "/home/xtreamcodes/iptv_xtream_codes/" in open("/etc/fstab").read():
         rFile = open("/etc/fstab", "a")
         rFile.write("tmpfs /home/xtreamcodes/iptv_xtream_codes/streams tmpfs defaults,noatime,nosuid,nodev,noexec,mode=1777,size=90% 0 0\ntmpfs /home/xtreamcodes/iptv_xtream_codes/tmp tmpfs defaults,noatime,nosuid,nodev,noexec,mode=1777,size=2G 0 0")
@@ -266,6 +265,7 @@ def configure():
         rFile.write("#! /bin/bash\n/home/xtreamcodes/iptv_xtream_codes/start_services.sh")
         rFile.close()
         os.system("chmod +x /etc/init.d/xtreamcodes > /dev/null")
+        os.system("systemctl daemon-reload > /dev/null")
     try: os.remove("/usr/bin/ffmpeg")
     except: pass
     if not os.path.exists("/home/xtreamcodes/iptv_xtream_codes/tv_archive"): os.mkdir("/home/xtreamcodes/iptv_xtream_codes/tv_archive/")
