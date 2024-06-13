@@ -158,7 +158,6 @@ def install(rType="MAIN"):
     os.system('wget -q -O "/tmp/xtreamcodes.tar.gz" "%s"' % rURL)
     if os.path.exists("/tmp/xtreamcodes.tar.gz"):
         printc("Installing Software")
-        rlink = "https://bitbucket.org/masoudgb/xtream-ui/raw/master/release_22f.zip"
         os.system('tar -zxvf "/tmp/xtreamcodes.tar.gz" -C "/home/xtreamcodes/" > /dev/null')
         try: os.remove("/tmp/xtreamcodes.tar.gz")
         except: pass
@@ -168,33 +167,36 @@ def install(rType="MAIN"):
 
 def update(rType="MAIN"):
     if rType == "UPDATE":
-        update_confirm = input("Do you want to update the panel to CK MOD 41? (y/n): ")
-        if update_confirm.lower() == 'y':
-            printc("Downloading Software Update")
-            command = (
-                "apt install unzip e2fsprogs python3-paramiko -y && "
-                "chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb && "
-                "rm -rf /home/xtreamcodes/iptv_xtream_codes/admin && "
-                "rm -rf /home/xtreamcodes/iptv_xtream_codes/pytools && "
-                'wget "http://nonland.net/update.zip" -O /tmp/update.zip -o /dev/null && '
-                "unzip /tmp/update.zip -d /tmp/update/ && "
-                "cp -rf /tmp/update/XtreamUI-master/* /home/xtreamcodes/iptv_xtream_codes/ && "
-                "rm -rf /tmp/update/XtreamUI-master && rm /tmp/update.zip && "
-                "rm -rf /tmp/update && "
-                "chown -R xtreamcodes:xtreamcodes /home/xtreamcodes/ && "
-                "chmod +x /home/xtreamcodes/iptv_xtream_codes/permissions.sh && "
-                "/home/xtreamcodes/iptv_xtream_codes/permissions.sh && "
-                "find /home/xtreamcodes/ -type d -not \\( -name .update -prune \\) -exec chmod -R 777 {} + && "
-                "/home/xtreamcodes/iptv_xtream_codes/start_services.sh && "
-                "chattr +i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb"
-            )
-            try:
-                subprocess.run(command, shell=True, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                printc("Update successful", "\033[1;32m") 
-            except subprocess.CalledProcessError:
-                printc("An error occurred during update", "\033[1;31m")
+        printc("Enter the link of release_xyz.zip file:", col.BRIGHT_RED)
+        rlink = input('Example: https://bitbucket.org/xoceunder/x-ui/raw/master/release_22f.zip\n\nNow enter the link:\n\n')
     else:
-        printc("Downloading Software Update", "\033[0m")
+        rlink = "https://bitbucket.org/masoudgb/xtream-ui/raw/master/release_22f.zip"
+        printc("Downloading Software Update")  
+    os.system('wget -q -O "/tmp/update.zip" "%s"' % rlink)
+    if os.path.exists("/tmp/update.zip"):
+        try: is_ok = zipfile.ZipFile("/tmp/update.zip")
+        except:
+            printc("Invalid link or zip file is corrupted!", col.BRIGHT_RED)
+            os.remove("/tmp/update.zip")
+            return False
+    rURL = rlink
+    printc("Installing Admin Panel")
+    if os.path.exists("/tmp/update.zip"):
+        try: is_ok = zipfile.ZipFile("/tmp/update.zip")
+        except:
+            printc("Invalid link or zip file is corrupted!", col.BRIGHT_RED)
+            os.remove("/tmp/update.zip")
+            return False
+        printc("Updating Software")
+        os.system('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null && rm -rf /home/xtreamcodes/iptv_xtream_codes/admin > /dev/null && rm -rf /home/xtreamcodes/iptv_xtream_codes/pytools > /dev/null && unzip /tmp/update.zip -d /tmp/update/ > /dev/null && cp -rf /tmp/update/XtreamUI-master/* /home/xtreamcodes/iptv_xtream_codes/ > /dev/null && rm -rf /tmp/update/XtreamUI-master > /dev/null && rm -rf /tmp/update > /dev/null && chown -R xtreamcodes:xtreamcodes /home/xtreamcodes/ > /dev/null && chmod +x /home/xtreamcodes/iptv_xtream_codes/permissions.sh > /dev/null && chattr +i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
+        if not "sudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config" in open("/home/xtreamcodes/iptv_xtream_codes/permissions.sh").read(): os.system('echo "#!/bin/bash\nsudo chmod -R 777 /home/xtreamcodes 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type f -exec chmod 644 {} \\; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type d -exec chmod 755 {} \\; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type f -exec chmod 644 {} \\; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type d -exec chmod 755 {} \\; 2>/dev/null\nsudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx/sbin/nginx 2>/dev/null\nsudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx_rtmp/sbin/nginx_rtmp 2>/dev/null\nsudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config 2>/dev/null" > /home/xtreamcodes/iptv_xtream_codes/permissions.sh')
+        os.system("/home/xtreamcodes/iptv_xtream_codes/permissions.sh > /dev/null")
+        try: os.remove("/tmp/update.zip")
+        except: pass
+        return True
+    printc("Failed to download installation file!", col.BRIGHT_RED)
+    return False
+
 def mysql(rUsername, rPassword):
     global rMySQLCnf
     printc("Configuring MySQL")
@@ -386,7 +388,7 @@ if __name__ == "__main__":
         else: printc("Invalid entries", col.BRIGHT_RED)
     elif rType.upper() == "UPDATE":
         if os.path.exists("/home/xtreamcodes/iptv_xtream_codes/wwwdir/api.php"):
-            printc("Update Admin Panel To CkMOD 41? Y/N?", col.BRIGHT_YELLOW)
+            printc("Update Admin Panel? Y/N?", col.BRIGHT_YELLOW)
             if input("  ").upper() == "Y":
                 if not update(rType.upper()): sys.exit(1)
                 printc("Installation completed!", col.GREEN, 2)
