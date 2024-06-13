@@ -155,43 +155,12 @@ def install(rType="MAIN"):
     except:
         printc("Invalid download URL!", col.BRIGHT_RED)
         return False
+        rlink = "https://bitbucket.org/masoudgb/xtream-ui/raw/master/release_22f.zip"
     os.system('wget -q -O "/tmp/xtreamcodes.tar.gz" "%s"' % rURL)
     if os.path.exists("/tmp/xtreamcodes.tar.gz"):
         printc("Installing Software")
         os.system('tar -zxvf "/tmp/xtreamcodes.tar.gz" -C "/home/xtreamcodes/" > /dev/null')
         try: os.remove("/tmp/xtreamcodes.tar.gz")
-        except: pass
-        return True
-    printc("Failed to download installation file!", col.BRIGHT_RED)
-    return False
-
-def update(rType="MAIN"):
-    if rType == "UPDATE":
-        printc("Enter the link of release_xyz.zip file:", col.BRIGHT_RED)
-        rlink = input('Example: https://bitbucket.org/xoceunder/x-ui/raw/master/release_22f.zip\n\nNow enter the link:\n\n')
-    else:
-        rlink = "https://bitbucket.org/masoudgb/xtream-ui/raw/master/release_22f.zip"
-        printc("Downloading Software Update")  
-    os.system('wget -q -O "/tmp/update.zip" "%s"' % rlink)
-    if os.path.exists("/tmp/update.zip"):
-        try: is_ok = zipfile.ZipFile("/tmp/update.zip")
-        except:
-            printc("Invalid link or zip file is corrupted!", col.BRIGHT_RED)
-            os.remove("/tmp/update.zip")
-            return False
-    rURL = rlink
-    printc("Installing Admin Panel")
-    if os.path.exists("/tmp/update.zip"):
-        try: is_ok = zipfile.ZipFile("/tmp/update.zip")
-        except:
-            printc("Invalid link or zip file is corrupted!", col.BRIGHT_RED)
-            os.remove("/tmp/update.zip")
-            return False
-        printc("Updating Software")
-        os.system('chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null && rm -rf /home/xtreamcodes/iptv_xtream_codes/admin > /dev/null && rm -rf /home/xtreamcodes/iptv_xtream_codes/pytools > /dev/null && unzip /tmp/update.zip -d /tmp/update/ > /dev/null && cp -rf /tmp/update/XtreamUI-master/* /home/xtreamcodes/iptv_xtream_codes/ > /dev/null && rm -rf /tmp/update/XtreamUI-master > /dev/null && rm -rf /tmp/update > /dev/null && chown -R xtreamcodes:xtreamcodes /home/xtreamcodes/ > /dev/null && chmod +x /home/xtreamcodes/iptv_xtream_codes/permissions.sh > /dev/null && chattr +i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb > /dev/null')
-        if not "sudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config" in open("/home/xtreamcodes/iptv_xtream_codes/permissions.sh").read(): os.system('echo "#!/bin/bash\nsudo chmod -R 777 /home/xtreamcodes 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type f -exec chmod 644 {} \\; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/admin/ -type d -exec chmod 755 {} \\; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type f -exec chmod 644 {} \\; 2>/dev/null\nsudo find /home/xtreamcodes/iptv_xtream_codes/wwwdir/ -type d -exec chmod 755 {} \\; 2>/dev/null\nsudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx/sbin/nginx 2>/dev/null\nsudo chmod +x /home/xtreamcodes/iptv_xtream_codes/nginx_rtmp/sbin/nginx_rtmp 2>/dev/null\nsudo chmod 400 /home/xtreamcodes/iptv_xtream_codes/config 2>/dev/null" > /home/xtreamcodes/iptv_xtream_codes/permissions.sh')
-        os.system("/home/xtreamcodes/iptv_xtream_codes/permissions.sh > /dev/null")
-        try: os.remove("/tmp/update.zip")
         except: pass
         return True
     printc("Failed to download installation file!", col.BRIGHT_RED)
