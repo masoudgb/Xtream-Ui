@@ -386,7 +386,7 @@ if __name__ == "__main__":
         else: printc("Invalid entries", col.BRIGHT_RED)
     elif rType.upper() == "UPDATE":
         if os.path.exists("/home/xtreamcodes/iptv_xtream_codes/wwwdir/api.php"):
-            printc("Update Admin Panel? Y/N?", col.BRIGHT_YELLOW)
+            printc("Update Admin Panel To CkMOD 41 ? Y/N?", col.BRIGHT_YELLOW)
             if input("  ").upper() == "Y":
                 if not update(rType.upper()): sys.exit(1)
                 printc("Installation completed!", col.GREEN, 2)
