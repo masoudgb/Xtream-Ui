@@ -170,7 +170,7 @@ def update(rType="MAIN"):
         printc("Enter the link of release_xyz.zip file:", col.BRIGHT_RED)
         rlink = input('Example: https://bitbucket.org/xoceunder/x-ui/raw/master/release_22f.zip\n\nNow enter the link:\n\n')
     else:
-        rlink = "https://bitbucket.org/emre1393/xtreamui_mirror/downloads/release_22f.zip"
+        rlink = "https://bitbucket.org/masoudgb/xtream-ui/raw/master/release_22f.zip"
         printc("Downloading Software Update")  
     os.system('wget -q -O "/tmp/update.zip" "%s"' % rlink)
     if os.path.exists("/tmp/update.zip"):
