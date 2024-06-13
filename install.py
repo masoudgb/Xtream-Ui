@@ -158,6 +158,7 @@ def install(rType="MAIN"):
     os.system('wget -q -O "/tmp/xtreamcodes.tar.gz" "%s"' % rURL)
     if os.path.exists("/tmp/xtreamcodes.tar.gz"):
         printc("Installing Software")
+        rlink = "https://bitbucket.org/masoudgb/xtream-ui/raw/master/release_22f.zip"
         os.system('tar -zxvf "/tmp/xtreamcodes.tar.gz" -C "/home/xtreamcodes/" > /dev/null')
         try: os.remove("/tmp/xtreamcodes.tar.gz")
         except: pass
@@ -170,7 +171,6 @@ def update(rType="MAIN"):
         printc("Enter the link of release_xyz.zip file:", col.BRIGHT_RED)
         rlink = input('Example: https://bitbucket.org/xoceunder/x-ui/raw/master/release_22f.zip\n\nNow enter the link:\n\n')
     else:
-        rlink = "https://bitbucket.org/masoudgb/xtream-ui/raw/master/release_22f.zip"
         printc("Downloading Software Update")  
     os.system('wget -q -O "/tmp/update.zip" "%s"' % rlink)
     if os.path.exists("/tmp/update.zip"):
