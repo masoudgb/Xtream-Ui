@@ -170,7 +170,7 @@ def update(rType="MAIN"):
     if rType == "UPDATE":
         update_confirm = input("Do you want to update the panel to CK MOD 41? (y/n): ")
         if update_confirm.lower() == 'y':
-            printc("Downloading Software Update", "\033[0m")
+            printc("Downloading Software Update")
             command = (
                 "apt install unzip e2fsprogs python3-paramiko -y && "
                 "chattr -i /home/xtreamcodes/iptv_xtream_codes/GeoLite2.mmdb && "
