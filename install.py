@@ -342,7 +342,6 @@ if __name__ == "__main__":
         printc("It can only be installed on Ubuntu 24.04")
         sys.exit(1)
     print("Welcome To Xtream-UI installer in Ubuntu %s" % rVersion, col.GREEN, 2)
-    print()
     print("Create By Masoud Gb", col.GREEN, 2)
     print(" ")
     rType = input("  Installation Type [MAIN, LB, UPDATE]: ")
