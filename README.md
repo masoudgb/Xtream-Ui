@@ -1,7 +1,7 @@
 # Xtream-UI Ubuntu 24.04
 
 ## Requirements
-- Ubuntu 24.04
+- **Ubuntu 24.04**
 
 ## Description
 Using this script, you can configure the Xtream-UI management panel with the latest **official version F22**, update to **CKMOD version 41**, or install a mirror. 
