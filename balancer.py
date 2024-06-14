@@ -6,7 +6,7 @@ from zipfile import ZipFile
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
-rDownloadURL = "https://bitbucket.org/xoceunder/x-ui/raw/master/sub_xui_xoceunder.tar.gz"
+rDownloadURL = "https://bitbucket.org/masoudgb/xtream-ui/raw/master/sub_xui_masoudgb.tar.gz"
 rPackages = ["libcurl4", "libxslt1-dev", "libgeoip-dev", "e2fsprogs", "wget", "mcrypt", "nscd", "htop", "zip", "unzip", "mc"]
 
 def is_installed(package_name):
