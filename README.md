@@ -12,7 +12,7 @@ The script uses **MariaDB 11.5** and **Nginx 1.19.2** and **PHP 7.3**
 ## Installation
 
 ```bash
-sudo apt update && sudo apt full-upgrade -y && rm -rf install.py && wget -qO install.py https://raw.githubusercontent.com/masoudgb/Xtream-Ui/main/install.py && sudo python3 install.py
+sudo apt update && rm -rf install.py && wget -qO install.py https://raw.githubusercontent.com/masoudgb/Xtream-Ui/main/install.py && sudo python3 install.py
 ```
 
 ## Acknowledgements
