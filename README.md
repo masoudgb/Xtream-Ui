@@ -1,4 +1,4 @@
-# Xtream-UI Management Panel
+# Xtream-UI Ubuntu 24.04
 
 ## Requirements
 - Ubuntu 24.04
@@ -16,6 +16,6 @@ wget https://raw.githubusercontent.com/masoudgb/Xtream-Ui/main/install.py
 ```
 
 ## Acknowledgements
-This project has been created in appreciation of the efforts of GTA, Emre1939, and Godfather. I hope you enjoy using it. Please report any issues with the script installation on GitHub. I welcome your feedback.
+This project has been created in appreciation of the efforts of GTA, emre1393, and Godfather. I hope you enjoy using it. Please report any issues with the script installation on GitHub. I welcome your feedback.
 
 Best regards.
