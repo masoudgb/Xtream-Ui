@@ -6,7 +6,7 @@ from zipfile import ZipFile
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
-rDownloadURL = "https://bitbucket.org/masoudgb/xtream-ui/raw/master/sub_xui_masoudgb.tar.gz"
+rDownloadURL = "https://bitbucket.org/masoudgb/xtream-ui/raw/master/sub_xui_masoudgb.zip"
 rPackages = ["libcurl4", "libxslt1-dev", "libgeoip-dev", "e2fsprogs", "wget", "mcrypt", "nscd", "htop", "zip", "unzip", "mc"]
 
 def is_installed(package_name):
@@ -52,15 +52,26 @@ def prepare():
 def install():
     global rInstall, rDownloadURL
     rURL = rDownloadURL
-    subprocess.run(f'wget -q -O "/tmp/xtreamcodes.tar.gz" "{rURL}"', shell=True, check=True)
-    if os.path.exists("/tmp/xtreamcodes.tar.gz"):
-        subprocess.run('tar -zxvf "/tmp/xtreamcodes.tar.gz" -C "/home/xtreamcodes/" -q', shell=True, check=True)
+
+    zip_file_path = "/tmp/xtreamcodes.zip"
+    subprocess.run(f'wget -q -O "{zip_file_path}" "{rURL}"', shell=True, check=True)
+
+    if os.path.exists(zip_file_path):
         try:
-            os.remove("/tmp/xtreamcodes.tar.gz")
+            with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+                zip_ref.extractall("/home/xtreamcodes/")
+        except zipfile.BadZipFile:
+            print(f"Error: {zip_file_path} is not a valid zip file!")
+            return False
+
+        try:
+            os.remove(zip_file_path)
         except OSError as e:
             print(f"Error removing downloaded file: {e}")
         return True
+
     return False
+
 
 def encrypt(rHost="127.0.0.1", rUsername="user_iptvpro", rPassword="", rDatabase="xtream_iptvpro", rServerID=1, rPort=7999):
     try:
