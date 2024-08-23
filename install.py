@@ -6,7 +6,7 @@ from zipfile import ZipFile
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
-rDownloadURL = {"main": "https://bitbucket.org/masoudgb/xtream-ui/raw/master/main_xui_masoudgb.tar.gz", "sub": "https://bitbucket.org/masoudgb/xtream-ui/raw/master/sub_xui_masoudgb.tar.gz"}
+rDownloadURL = {"main": "https://bitbucket.org/masoudgb/xtream-ui/raw/master/main_xui_masoudgb.zip", "sub": "https://bitbucket.org/masoudgb/xtream-ui/raw/master/sub_xui_masoudgb.zip"}
 import os
 rPackages = ["libcurl4", "libxslt1-dev", "libgeoip-dev", "libonig-dev", "e2fsprogs", "wget", "mcrypt", "nscd", "htop", "zip", "unzip", "mc", "mariadb-server", "libpng16-16", "python3-paramiko", "python-is-python3"]
 rInstall = {"MAIN": "main", "LB": "sub"}
@@ -142,21 +142,39 @@ def prepare(rType="MAIN"):
         os.mkdir("/home/xtreamcodes")
 
     return True
-    
+
 def install(rType="MAIN"):
     global rInstall, rDownloadURL
     printc("Downloading Software")
-    try: rURL = rDownloadURL[rInstall[rType]]
-    except:
+    
+    try:
+        rURL = rDownloadURL[rInstall[rType]]
+    except KeyError:
         printc("Invalid download URL!", col.BRIGHT_RED)
         return False
-    os.system('wget -q -O "/tmp/xtreamcodes.tar.gz" "%s"' % rURL)
-    if os.path.exists("/tmp/xtreamcodes.tar.gz"):
+
+    zip_file_path = "/tmp/xtreamcodes.zip"
+    try:
+        subprocess.run(['wget', '-q', '-O', zip_file_path, rURL], check=True)
+    except subprocess.CalledProcessError:
+        printc("Failed to download installation file!", col.BRIGHT_RED)
+        return False
+
+    if os.path.exists(zip_file_path):
         printc("Installing Software")
-        os.system('tar -zxvf "/tmp/xtreamcodes.tar.gz" -C "/home/xtreamcodes/" > /dev/null')
-        try: os.remove("/tmp/xtreamcodes.tar.gz")
-        except: pass
+        try:
+            with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+                zip_ref.extractall("/home/xtreamcodes/")
+        except zipfile.BadZipFile:
+            printc(f"Error: {zip_file_path} is not a valid zip file!", col.BRIGHT_RED)
+            return False
+
+        try:
+            os.remove(zip_file_path)
+        except OSError as e:
+            printc(f"Error removing file {zip_file_path}: {e.strerror}")
         return True
+    
     printc("Failed to download installation file!", col.BRIGHT_RED)
     return False
 
