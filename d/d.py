@@ -123,20 +123,35 @@ def installadminpanel():
     printc("Failed to download installation file!", col.FAIL)
     return False
 
+import os
+import time
+import shutil
+
 def mysql(rUsername, rPassword):
-    global rMySQLCnf
-    printc("Configuring MySQL")
+    printc("Configuring MySQL...")
 
     printc("Checking if MySQL is ready...")
     while os.system("mysqladmin ping -h mysql --silent") != 0:
-        printc("Waiting for MySQL to start...")
+        print("Waiting for MySQL to start...")
         time.sleep(5)
 
     printc("MySQL is ready!")
+    rExtra = "-p%s" % rPassword if rPassword else ""
+    os.system('mysql -h mysql -u root %s -e "DROP DATABASE IF EXISTS xtream_iptvpro; CREATE DATABASE xtream_iptvpro;"' % rExtra)
+    os.system('mysql -h mysql -u root %s xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql' % rExtra)
+    os.system('mysql -h mysql -u root %s -e "DROP USER IF EXISTS \'%s\'@\'%%\';"' % (rExtra, rUsername))
+    os.system('mysql -h mysql -u root %s -e "CREATE USER \'%s\'@\'%%\' IDENTIFIED BY \'%s\';"' % (rExtra, rUsername, rPassword))
+    os.system('mysql -h mysql -u root %s -e "GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'%s\'@\'%%\'; FLUSH PRIVILEGES;"' % (rExtra, rUsername))
+    os.system('mysql -h mysql -u root %s -e "USE xtream_iptvpro; UPDATE settings SET get_real_ip_client=\'\', double_auth=\'1\', hash_lb=\'1\', mag_security=\'1\' WHERE id=\'1\';"' % rExtra)
 
-    os.system('mysql -h mysql -u root -p"%s" -e "DROP DATABASE IF EXISTS xtream_iptvpro; CREATE DATABASE xtream_iptvpro;"' % rPassword)
-    os.system('mysql -h mysql -u root -p"%s" -e "CREATE USER \'%s\'@\'%%\' IDENTIFIED BY \'%s\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'%s\'@\'%%\'; FLUSH PRIVILEGES;"' % (rPassword, rUsername, rPassword, rUsername))
+    try:
+        os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
+    except:
+        pass
 
+    printc("MySQL configuration completed successfully!")
+    return True
+    
 def encrypt(rHost="127.0.0.1", rUsername="user_iptvpro", rPassword="", rDatabase="xtream_iptvpro", rServerID=1, rPort=7999):
     printc("Encrypting...")
     try: os.remove("/home/xtreamcodes/iptv_xtream_codes/config")
