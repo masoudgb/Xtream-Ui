@@ -134,36 +134,36 @@ fix_mysql()
 
 def mysql(rUsername, rPassword):
     global rMySQLCnf
-    printc("Configuring MySQL")
-
+    print("Configuring MySQL")
     rCreate = True
     if os.path.exists("/etc/mysql/my.cnf"):
-        with open("/etc/mysql/my.cnf", "r") as file:
-            if file.read(14) == "# Xtream Codes":
-                rCreate = False
-
+        if open("/etc/mysql/my.cnf", "r").read(14) == "# Xtream Codes":
+            rCreate = False
     if rCreate:
         shutil.copy("/etc/mysql/my.cnf", "/etc/mysql/my.cnf.xc")
         with open("/etc/mysql/my.cnf", "w") as rFile:
             rFile.write(rMySQLCnf)
-        os.system("systemctl restart mysql")  # راه‌اندازی مجدد MySQL
-
-    for _ in range(5):
-        rMySQLRoot = raw_input("Enter MySQL Root Password: ")
-        if rMySQLRoot:
-            rExtra = " -p{}".format(rMySQLRoot)
-        else:
-            rExtra = ""
-
+        subprocess.run(["service", "mysql", "restart"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    
+    print("Enter MySQL Root Password:")
+    for i in range(5):
+        rMySQLRoot = input("  ")
+        print(" ")
+        rExtra = f" -p{rMySQLRoot}" if len(rMySQLRoot) > 0 else ""
+        
+        print("Drop existing & create database? Y/N")
+        rDrop = input("  ").upper() == "Y"
+        
         try:
-            os.system("mysql -u root{} -e \"CREATE DATABASE IF NOT EXISTS xtream_iptvpro;\"".format(rExtra))
-            os.system("mysql -u root{} xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql".format(rExtra))
-            os.system("mysql -u root{} -e \"CREATE USER '{}'@'localhost' IDENTIFIED BY '{}'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO '{}'@'localhost'; FLUSH PRIVILEGES;\"".format(rExtra, rUsername, rPassword, rUsername))
-
-            printc("MySQL configured successfully!")
+            if rDrop:
+                subprocess.run(f'mysql -u root{rExtra} -e "DROP USER IF EXISTS \'{rUsername}\'@\'%\'; DROP USER IF EXISTS \'{rUsername}\'@\'localhost\'; DROP USER IF EXISTS \'{rUsername}\'@\'127.0.0.1\';"', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(f'mysql -u root{rExtra} -e "DROP DATABASE IF EXISTS xtream_iptvpro; CREATE DATABASE IF NOT EXISTS xtream_iptvpro;"', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(f"mysql -u root{rExtra} xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                
             return True
-        except:
-            printc("Invalid password! Try again.")
+        except Exception as e:
+            print(f"Invalid password! Try again: {e}")
+    
     return False
     
 def encrypt(rHost="127.0.0.1", rUsername="user_iptvpro", rPassword="", rDatabase="xtream_iptvpro", rServerID=1, rPort=7999):
