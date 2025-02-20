@@ -148,7 +148,7 @@ def mysql(rUsername, rPassword):
     printc("Enter MySQL Root Password:")
     for i in range(5):
         rMySQLRoot = input("  ")
-        print(" ")
+        printc(" ")
         rExtra = f" -p{rMySQLRoot}" if len(rMySQLRoot) > 0 else ""
         
         printc("Drop existing & create database? Y/N")
@@ -173,10 +173,11 @@ def mysql(rUsername, rPassword):
                         os.system('echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.1" > /etc/mysql/mysqld')
                         os.system('echo "%s" > /lib/systemd/system/mysql.service' % rMySQLServiceFile)
                         os.system('systemctl daemon-reload; systemctl restart mysql.service;')
-            try: os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
-            except: pass
+            try: os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")    
             return True
-        except: printc("Invalid password! Try again", col.FAIL)
+        except Exception as e:
+            printc(f"Invalid password! Try again: {e}")
+    
     return False
     
 def encrypt(rHost="127.0.0.1", rUsername="user_iptvpro", rPassword="", rDatabase="xtream_iptvpro", rServerID=1, rPort=7999):
