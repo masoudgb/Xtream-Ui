@@ -140,16 +140,16 @@ def mysql(rUsername, rPassword):
         os.system("systemctl restart mysql")  # راه‌اندازی مجدد MySQL
 
     for _ in range(5):
-        rMySQLRoot = input("Enter MySQL Root Password: ")
+        rMySQLRoot = raw_input("Enter MySQL Root Password: ")
         if rMySQLRoot:
-            rExtra = f" -p{rMySQLRoot}"
+            rExtra = " -p{}".format(rMySQLRoot)
         else:
             rExtra = ""
 
         try:
-            os.system(f'mysql -u root{rExtra} -e "CREATE DATABASE IF NOT EXISTS xtream_iptvpro;"')
-            os.system(f'mysql -u root{rExtra} xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql')
-            os.system(f'mysql -u root{rExtra} -e "CREATE USER \'{rUsername}\'@\'localhost\' IDENTIFIED BY \'{rPassword}\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'{rUsername}\'@\'localhost\'; FLUSH PRIVILEGES;"')
+            os.system("mysql -u root{} -e \"CREATE DATABASE IF NOT EXISTS xtream_iptvpro;\"".format(rExtra))
+            os.system("mysql -u root{} xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql".format(rExtra))
+            os.system("mysql -u root{} -e \"CREATE USER '{}'@'localhost' IDENTIFIED BY '{}'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO '{}'@'localhost'; FLUSH PRIVILEGES;\"".format(rExtra, rUsername, rPassword, rUsername))
 
             printc("MySQL configured successfully!")
             return True
