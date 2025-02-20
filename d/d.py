@@ -156,7 +156,7 @@ def mysql(rUsername, rPassword):
     for i in range(5):
         rMySQLRoot = input("  ").strip()
         printc(" ")
-        rExtra = f" -p{rMySQLRoot}" if rMySQLRoot else ""
+        rExtra = " -p%s" % rMySQLRoot if rMySQLRoot else ""
         
         printc("Drop existing & create database? Y/N")
         rDrop = input("  ").upper() == "Y"
