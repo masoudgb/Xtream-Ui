@@ -132,13 +132,20 @@ def fix_mysql():
 
 fix_mysql()
 
+import os
+import shutil
+import subprocess
+
 def mysql(rUsername, rPassword):
     global rMySQLCnf
     printc("Configuring MySQL")
+    
     rCreate = True
     if os.path.exists("/etc/mysql/my.cnf"):
-        if open("/etc/mysql/my.cnf", "r").read(14) == "# Xtream Codes":
-            rCreate = False
+        with open("/etc/mysql/my.cnf", "r") as f:
+            if f.read(14) == "# Xtream Codes":
+                rCreate = False
+    
     if rCreate:
         shutil.copy("/etc/mysql/my.cnf", "/etc/mysql/my.cnf.xc")
         with open("/etc/mysql/my.cnf", "w") as rFile:
@@ -147,33 +154,81 @@ def mysql(rUsername, rPassword):
     
     printc("Enter MySQL Root Password:")
     for i in range(5):
-        rMySQLRoot = input("  ")
+        rMySQLRoot = input("  ").strip()
         printc(" ")
-        rExtra = f" -p{rMySQLRoot}" if len(rMySQLRoot) > 0 else ""
+        rExtra = f" -p{rMySQLRoot}" if rMySQLRoot else ""
         
         printc("Drop existing & create database? Y/N")
         rDrop = input("  ").upper() == "Y"
         
         try:
             if rDrop:
-                subprocess.run(f'mysql -u root{rExtra} -e "DROP USER IF EXISTS \'{rUsername}\'@\'%\'; DROP USER IF EXISTS \'{rUsername}\'@\'localhost\'; DROP USER IF EXISTS \'{rUsername}\'@\'127.0.0.1\';"', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                subprocess.run(f'mysql -u root{rExtra} -e "DROP DATABASE IF EXISTS xtream_iptvpro; CREATE DATABASE IF NOT EXISTS xtream_iptvpro;"', shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                subprocess.run(f"mysql -u root{rExtra} xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql", shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                os.system('mysql -u root%s -e "USE xtream_iptvpro; UPDATE settings SET live_streaming_pass = \'%s\', unique_id = \'%s\', crypt_load_balancing = \'%s\', get_real_ip_client=\'\';" > /dev/null' % (rExtra, generate(20), generate(12), generate(20)))
-                os.system('mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO streaming_servers (id, server_name, domain_name, server_ip, vpn_ip, ssh_password, ssh_port, diff_time_main, http_broadcast_port, total_clients, system_os, network_interface, latency, status, enable_geoip, geoip_countries, last_check_ago, can_delete, server_hardware, total_services, persistent_connections, rtmp_port, geoip_type, isp_names, isp_type, enable_isp, boost_fpm, http_ports_add, network_guaranteed_speed, https_broadcast_port, https_ports_add, whitelist_ips, watchdog_data, timeshift_only) VALUES (1, \'Main Server\', \'\', \'%s\', \'\', NULL, NULL, 0, 8080, 1000, \'%s\', \'eth0\', 0, 1, 0, \'\', 0, 0, \'{}\', 3, 0, 8880, \'low_priority\', \'\', \'low_priority\', 0, 1, \'\', 1000, 8443, \'\', \'[\"127.0.0.1\",\"\"]\', \'{}\', 0);" > /dev/null' % (rExtra, getIP(), getVersion()))
-                os.system('mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO reg_users (id, username, password, email, member_group_id, verified, status) VALUES (1, \'admin\', \'\$6\$rounds=20000\$xtreamcodes\$XThC5OwfuS0YwS4ahiifzF14vkGbGsFF1w7ETL4sRRC5sOrAWCjWvQJDromZUQoQuwbAXAFdX3h3Cp3vqulpS0\', \'admin@website.com\', 1, 1, 1);" > /dev/null'  % rExtra)
-                os.system('mysql -u root%s -e "CREATE USER \'%s\'@\'localhost\' IDENTIFIED BY \'%s\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'%s\'@\'localhost\' WITH GRANT OPTION; GRANT SELECT, PROCESS, LOCK TABLES ON *.* TO \'%s\'@\'localhost\';FLUSH PRIVILEGES;" > /dev/null' % (rExtra, rUsername, rPassword, rUsername, rUsername))
-                os.system('mysql -u root%s -e "CREATE USER \'%s\'@\'127.0.0.1\' IDENTIFIED BY \'%s\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'%s\'@\'127.0.0.1\' WITH GRANT OPTION; GRANT SELECT, PROCESS, LOCK TABLES ON *.* TO \'%s\'@\'127.0.0.1\';FLUSH PRIVILEGES;" > /dev/null' % (rExtra, rUsername, rPassword, rUsername, rUsername))
-                os.system('mysql -u root%s -e "GRANT SELECT, INSERT, UPDATE, DELETE ON xtream_iptvpro.* TO \'%s\'@\'%%\' IDENTIFIED BY \'%s\';FLUSH PRIVILEGES;" > /dev/null' % (rExtra, rUsername, rPassword))
-                os.system('mysql -u root%s -e "USE xtream_iptvpro; CREATE TABLE IF NOT EXISTS dashboard_statistics (id int(11) NOT NULL AUTO_INCREMENT, type varchar(16) NOT NULL DEFAULT \'\', time int(16) NOT NULL DEFAULT \'0\', count int(16) NOT NULL DEFAULT \'0\', PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=latin1; INSERT INTO dashboard_statistics (type, time, count) VALUES(\'conns\', UNIX_TIMESTAMP(), 0),(\'users\', UNIX_TIMESTAMP(), 0);\" > /dev/null' % rExtra)
-                #last one is to prevent an xc vulnerability, run "UPDATE settings SET get_real_ip_client='HTTP_CF_CONNECTING_IP' where id=1;" query if you are using cf proxy.
-                os.system('mysql -u root%s -e "USE xtream_iptvpro; UPDATE settings SET get_real_ip_client=\'\', double_auth=\'1\', hash_lb=\'1\', mag_security=\'1\' where id=\'1\';" > /dev/null'  % rExtra)
+                subprocess.run(
+                    f'mysql -u root{rExtra} -e "DROP USER IF EXISTS \'{rUsername}\'@\'%\'; DROP USER IF EXISTS \'{rUsername}\'@\'localhost\'; DROP USER IF EXISTS \'{rUsername}\'@\'127.0.0.1\';"',
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                
+                subprocess.run(
+                    f'mysql -u root{rExtra} -e "DROP DATABASE IF EXISTS xtream_iptvpro; CREATE DATABASE IF NOT EXISTS xtream_iptvpro;"',
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                
+                subprocess.run(
+                    f"mysql -u root{rExtra} xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql",
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                
+                subprocess.run(
+                    f'mysql -u root{rExtra} -e "USE xtream_iptvpro; UPDATE settings SET live_streaming_pass = \'{generate(20)}\', unique_id = \'{generate(12)}\', crypt_load_balancing = \'{generate(20)}\', get_real_ip_client=\'\';"',
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                
+                subprocess.run(
+                    f'mysql -u root{rExtra} -e "USE xtream_iptvpro; REPLACE INTO streaming_servers (id, server_name, domain_name, server_ip, vpn_ip, ssh_password, ssh_port, diff_time_main, http_broadcast_port, total_clients, system_os, network_interface, latency, status, enable_geoip, geoip_countries, last_check_ago, can_delete, server_hardware, total_services, persistent_connections, rtmp_port, geoip_type, isp_names, isp_type, enable_isp, boost_fpm, http_ports_add, network_guaranteed_speed, https_broadcast_port, https_ports_add, whitelist_ips, watchdog_data, timeshift_only) VALUES (1, \'Main Server\', \'\', \'{getIP()}\', \'\', NULL, NULL, 0, 8080, 1000, \'{getVersion()}\', \'eth0\', 0, 1, 0, \'\', 0, 0, \'{{}}\', 3, 0, 8880, \'low_priority\', \'\', \'low_priority\', 0, 1, \'\', 1000, 8443, \'\', \'[\"127.0.0.1\",\"\"]\', \'{{}}\', 0);"',
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                
+                subprocess.run(
+                    f'mysql -u root{rExtra} -e "USE xtream_iptvpro; REPLACE INTO reg_users (id, username, password, email, member_group_id, verified, status) VALUES (1, \'admin\', \'\$6\$rounds=20000\$xtreamcodes\$XThC5OwfuS0YwS4ahiifzF14vkGbGsFF1w7ETL4sRRC5sOrAWCjWvQJDromZUQoQuwbAXAFdX3h3Cp3vqulpS0\', \'admin@website.com\', 1, 1, 1);"',
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                
+                subprocess.run(
+                    f'mysql -u root{rExtra} -e "CREATE USER \'{rUsername}\'@\'localhost\' IDENTIFIED BY \'{rPassword}\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'{rUsername}\'@\'localhost\' WITH GRANT OPTION; GRANT SELECT, PROCESS, LOCK TABLES ON *.* TO \'{rUsername}\'@\'localhost\'; FLUSH PRIVILEGES;"',
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                subprocess.run(
+                    f'mysql -u root{rExtra} -e "CREATE USER \'{rUsername}\'@\'127.0.0.1\' IDENTIFIED BY \'{rPassword}\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'{rUsername}\'@\'127.0.0.1\' WITH GRANT OPTION; GRANT SELECT, PROCESS, LOCK TABLES ON *.* TO \'{rUsername}\'@\'127.0.0.1\'; FLUSH PRIVILEGES;"',
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                subprocess.run(
+                    f'mysql -u root{rExtra} -e "GRANT SELECT, INSERT, UPDATE, DELETE ON xtream_iptvpro.* TO \'{rUsername}\'@\'%\' IDENTIFIED BY \'{rPassword}\'; FLUSH PRIVILEGES;"',
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                
+                subprocess.run(
+                    f'mysql -u root{rExtra} -e "USE xtream_iptvpro; CREATE TABLE IF NOT EXISTS dashboard_statistics (id int(11) NOT NULL AUTO_INCREMENT, type varchar(16) NOT NULL DEFAULT \'\', time int(16) NOT NULL DEFAULT \'0\', count int(16) NOT NULL DEFAULT \'0\', PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=latin1; INSERT INTO dashboard_statistics (type, time, count) VALUES(\'conns\', UNIX_TIMESTAMP(), 0),(\'users\', UNIX_TIMESTAMP(), 0);"',
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                
+                subprocess.run(
+                    f'mysql -u root{rExtra} -e "USE xtream_iptvpro; UPDATE settings SET get_real_ip_client=\'\', double_auth=\'1\', hash_lb=\'1\', mag_security=\'1\' where id=\'1\';"',
+                    shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+                )
+                
                 if not os.path.exists("/etc/mysql/mysqld"):
-                    if not "EnvironmentFile=-/etc/mysql/mysqld" in open("/lib/systemd/system/mysql.service").read(): 
-                        os.system('echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.1" > /etc/mysql/mysqld')
-                        os.system('echo "%s" > /lib/systemd/system/mysql.service' % rMySQLServiceFile)
-                        os.system('systemctl daemon-reload; systemctl restart mysql.service;')
-            try: os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")    
+                    with open("/lib/systemd/system/mysql.service", "r") as f:
+                        if "EnvironmentFile=-/etc/mysql/mysqld" not in f.read():
+                            with open("/etc/mysql/mysqld", "w") as f:
+                                f.write("LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.1")
+                            subprocess.run(["systemctl", "daemon-reload"])
+                            subprocess.run(["systemctl", "restart", "mysql"])
+            
+            try:
+                os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
+            except:
+                pass
+            
             return True
         except Exception as e:
             printc(f"Invalid password! Try again: {e}")
