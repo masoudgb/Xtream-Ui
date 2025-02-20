@@ -123,34 +123,39 @@ def installadminpanel():
     printc("Failed to download installation file!", col.FAIL)
     return False
 
-import os
-import time
-import shutil
-
 def mysql(rUsername, rPassword):
-    printc("Configuring MySQL...")
+    global rMySQLCnf
+    printc("Configuring MySQL")
 
-    printc("Checking if MySQL is ready...")
-    while os.system("mysqladmin ping -h mysql --silent") != 0:
-        print("Waiting for MySQL to start...")
-        time.sleep(5)
+    rCreate = True
+    if os.path.exists("/etc/mysql/my.cnf"):
+        with open("/etc/mysql/my.cnf", "r") as file:
+            if file.read(14) == "# Xtream Codes":
+                rCreate = False
 
-    printc("MySQL is ready!")
-    rExtra = "-p%s" % rPassword if rPassword else ""
-    os.system('mysql -h mysql -u root %s -e "DROP DATABASE IF EXISTS xtream_iptvpro; CREATE DATABASE xtream_iptvpro;"' % rExtra)
-    os.system('mysql -h mysql -u root %s xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql' % rExtra)
-    os.system('mysql -h mysql -u root %s -e "DROP USER IF EXISTS \'%s\'@\'%%\';"' % (rExtra, rUsername))
-    os.system('mysql -h mysql -u root %s -e "CREATE USER \'%s\'@\'%%\' IDENTIFIED BY \'%s\';"' % (rExtra, rUsername, rPassword))
-    os.system('mysql -h mysql -u root %s -e "GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'%s\'@\'%%\'; FLUSH PRIVILEGES;"' % (rExtra, rUsername))
-    os.system('mysql -h mysql -u root %s -e "USE xtream_iptvpro; UPDATE settings SET get_real_ip_client=\'\', double_auth=\'1\', hash_lb=\'1\', mag_security=\'1\' WHERE id=\'1\';"' % rExtra)
+    if rCreate:
+        shutil.copy("/etc/mysql/my.cnf", "/etc/mysql/my.cnf.xc")
+        with open("/etc/mysql/my.cnf", "w") as rFile:
+            rFile.write(rMySQLCnf)
+        os.system("systemctl restart mysql")  # راه‌اندازی مجدد MySQL
 
-    try:
-        os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
-    except:
-        pass
+    for _ in range(5):
+        rMySQLRoot = input("Enter MySQL Root Password: ")
+        if rMySQLRoot:
+            rExtra = f" -p{rMySQLRoot}"
+        else:
+            rExtra = ""
 
-    printc("MySQL configuration completed successfully!")
-    return True
+        try:
+            os.system(f'mysql -u root{rExtra} -e "CREATE DATABASE IF NOT EXISTS xtream_iptvpro;"')
+            os.system(f'mysql -u root{rExtra} xtream_iptvpro < /home/xtreamcodes/iptv_xtream_codes/database.sql')
+            os.system(f'mysql -u root{rExtra} -e "CREATE USER \'{rUsername}\'@\'localhost\' IDENTIFIED BY \'{rPassword}\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'{rUsername}\'@\'localhost\'; FLUSH PRIVILEGES;"')
+
+            printc("MySQL configured successfully!")
+            return True
+        except:
+            printc("Invalid password! Try again.")
+    return False
     
 def encrypt(rHost="127.0.0.1", rUsername="user_iptvpro", rPassword="", rDatabase="xtream_iptvpro", rServerID=1, rPort=7999):
     printc("Encrypting...")
