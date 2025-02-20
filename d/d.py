@@ -122,6 +122,15 @@ def installadminpanel():
         return True
     printc("Failed to download installation file!", col.FAIL)
     return False
+    
+def fix_mysql():
+    print("Fixing MySQL socket issue...")
+    os.system('echo -e "[mysqld]\\nsocket=/var/run/mysqld/mysqld.sock" >> /etc/mysql/my.cnf')
+    os.system('mkdir -p /var/run/mysqld')
+    os.system('chown mysql:mysql /var/run/mysqld')
+    os.system('mysqld --user=mysql --datadir=/var/lib/mysql --socket=/var/run/mysqld/mysqld.sock &')
+
+fix_mysql()
 
 def mysql(rUsername, rPassword):
     global rMySQLCnf
