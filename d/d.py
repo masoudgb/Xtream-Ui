@@ -121,16 +121,7 @@ def installadminpanel():
         os.system('unzip -o /tmp/update2.zip -d /tmp/update2/ > /dev/null && cp -rf /tmp/update2/* /home/xtreamcodes/iptv_xtream_codes/ > /dev/null && rm -rf /tmp/update2/* > /dev/null && rm -rf /tmp/update2 > /dev/null && chown -R xtreamcodes:xtreamcodes /home/xtreamcodes/ > /dev/null > /dev/null')
         return True
     printc("Failed to download installation file!", col.FAIL)
-    return False
-    
-def fix_mysql():
-    print("Fixing MySQL socket issue...")
-    os.system('echo -e "[mysqld]\\nsocket=/var/run/mysqld/mysqld.sock" >> /etc/mysql/my.cnf')
-    os.system('mkdir -p /var/run/mysqld')
-    os.system('chown mysql:mysql /var/run/mysqld')
-    os.system('mysqld --user=mysql --datadir=/var/lib/mysql --socket=/var/run/mysqld/mysqld.sock &')
-
-fix_mysql()
+    return False  
 
 def mysql(rUsername, rPassword):
     global rMySQLCnf
