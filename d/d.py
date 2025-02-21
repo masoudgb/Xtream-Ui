@@ -123,10 +123,14 @@ def installadminpanel():
     printc("Failed to download installation file!", col.FAIL)
     return False
 
-
 def mysql(rUsername, rPassword):
     global rMySQLCnf
     printc("Configuring MySQL")
+    if not os.path.exists("/var/run/mysqld"):
+        os.makedirs("/var/run/mysqld")
+        os.chown("/var/run/mysqld", pwd.getpwnam("mysql").pw_uid, grp.getgrnam("mysql").gr_gid)
+        os.chmod("/var/run/mysqld", 0o755)
+
     rCreate = True
     if os.path.exists("/etc/mysql/my.cnf"):
         if open("/etc/mysql/my.cnf", "r").read(14) == "# Xtream Codes": rCreate = False
@@ -135,8 +139,9 @@ def mysql(rUsername, rPassword):
         rFile = open("/etc/mysql/my.cnf", "w")
         rFile.write(rMySQLCnf)
         rFile.close()
-        # Start MySQL without systemd
         os.system("mysqld_safe --user=mysql &")
+        time.sleep(5)  # Wait for MySQL to start
+
     printc("Enter MySQL Root Password:", col.WARNING)
     for i in range(5):
         rMySQLRoot = raw_input("  ")
