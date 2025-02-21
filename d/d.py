@@ -146,7 +146,6 @@ def mysql(rUsername, rPassword):
     global rMySQLCnf
     printc("Configuring MySQL")
 
-    # Create /var/run/mysqld directory and set permissions
     if not os.path.exists("/var/run/mysqld"):
         os.makedirs("/var/run/mysqld")
         os.chown("/var/run/mysqld", pwd.getpwnam("mysql").pw_uid, grp.getgrnam("mysql").gr_gid)
@@ -161,8 +160,8 @@ def mysql(rUsername, rPassword):
         rFile = open("/etc/mysql/my.cnf", "w")
         rFile.write(rMySQLCnf)
         rFile.close()
-        # Start MySQL without systemd
-        os.system("mysqld_safe --user=mysql &")
+        # Start MySQL without systemd and suppress logs
+        os.system("mysqld_safe --user=mysql > /dev/null 2>&1 &")
         time.sleep(5)  # Wait for MySQL to start
 
     printc("Enter MySQL Root Password:", col.WARNING)
@@ -193,10 +192,8 @@ def mysql(rUsername, rPassword):
                 # Last one is to prevent an XC vulnerability, run "UPDATE settings SET get_real_ip_client='HTTP_CF_CONNECTING_IP' where id=1;" query if you are using CF proxy.
                 os.system('mysql -u root%s -e "USE xtream_iptvpro; UPDATE settings SET get_real_ip_client=\'\', double_auth=\'1\', hash_lb=\'1\', mag_security=\'1\' where id=\'1\';" > /dev/null' % rExtra)
                 if not os.path.exists("/etc/mysql/mysqld"):
-                    if not "EnvironmentFile=-/etc/mysql/mysqld" in open("/lib/systemd/system/mysql.service").read():
-                        os.system('echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.1" > /etc/mysql/mysqld')
-                        os.system('echo "%s" > /lib/systemd/system/mysql.service' % rMySQLServiceFile)
-                        os.system('systemctl daemon-reload; systemctl restart mysql.service;')
+                    os.system('echo "LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.1" > /etc/mysql/mysqld')
+                    os.system("mysqld_safe --user=mysql > /dev/null 2>&1 &")
             try:
                 os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
             except:
