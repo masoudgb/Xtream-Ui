@@ -1,20 +1,20 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import subprocess, os, random, string, sys, shutil, socket, zipfile, urllib.request, urllib.error, urllib.parse, json, base64
+import subprocess, os, random, string, sys, shutil, socket, zipfile, urllib.request, urllib.error, urllib.parse, json, base64, glob
 from itertools import cycle
 from zipfile import ZipFile
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
 
 rDownloadURL = {"main": "https://bitbucket.org/masoudgb/xtream-ui/raw/master/main_xui_masoudgb.zip", "sub": "https://bitbucket.org/masoudgb/xtream-ui/raw/master/sub_xui_masoudgb.zip"}
-import os
 rPackages = ["libcurl4", "libxslt1-dev", "libgeoip-dev", "libonig-dev", "e2fsprogs", "wget", "mcrypt", "nscd", "htop", "zip", "unzip", "mc", "mariadb-server", "libpng16-16", "python3-paramiko", "python-is-python3"]
 rInstall = {"MAIN": "main", "LB": "sub"}
 rUpdate = {"UPDATE": "update"}
-rMySQLCnf = base64.b64decode("IyBYdHJlYW0gQ29kZXMgLSBVcGRhdGVkIGZvciBNYXJpYURCIDEwLjExCgpbY2xpZW50XQpwb3J0ID0gMzMwNgoKW215c3FsZF9zYWZlXQpuaWNlID0gMAoKW215c3FsZF0KdXNlciA9IG15c3FsCnBvcnQgPSA3OTk5CmJhc2VkaXIgPSAvdXNyCmRhdGFkaXIgPSAvdmFyL2xpYi9teXNxbAp0bXBkaXIgPSAvdG1wCmxjLW1lc3NhZ2VzLWRpciA9IC91c3Ivc2hhcmUvbXlzcWwKc2tpcC1leHRlcm5hbC1sb2NraW5nCnNraXAtbmFtZS1yZXNvbHZlPTEKCmJpbmQtYWRkcmVzcyA9ICoKa2V5X2J1ZmZlcl9zaXplID0gMTI4TQoKbXlpc2FtLXJlY292ZXItb3B0aW9ucyA9IEJBQ0tVUAptYXhfYWxsb3dlZF9wYWNrZXQgPSA2NE0KbWF4X2xlbmd0aF9mb3Jfc29ydF9kYXRhID0gODE5MgpxdWVyeV9jYWNoZV9saW1pdCA9IDRNCnF1ZXJ5X2NhY2hlX3NpemUgPSAwCnF1ZXJ5X2NhY2hlX3R5cGUgPSAwCgpleHBpcmVfbG9nc19kYXlzID0gMTAKbWF4X2JpbmxvZ19zaXplID0gMTAwTQoKbWF4X2Nvbm5lY3Rpb25zID0gMjAwMApiYWNrX2xvZyA9IDQwOTYKb3Blbl9maWxlc19saW1pdCA9IDE2Mzg0Cmlubm9kYl9vcGVuX2ZpbGVzID0gMTYzODQKbWF4X2Nvbm5lY3RfZXJyb3JzID0gMzA3Mgp0YWJsZV9vcGVuX2NhY2hlID0gNDA5Ngp0YWJsZV9kZWZpbml0aW9uX2NhY2hlID0gNDA5NgoKdG1wX3RhYmxlX3NpemUgPSAxRwptYXhfaGVhcF90YWJsZV9zaXplID0gMUcKCmlubm9kYl9idWZmZXJfcG9vbF9zaXplID0gMUcKaW5ub2RiX2xvZ19maWxlX3NpemUgPSA1MTJNCmlubm9kYl9sb2dfYnVmZmVyX3NpemUgPSAxNk0KaW5ub2RiX2ZsdXNoX2xvZ19hdF90cnhfY29tbWl0ID0gMgppbm5vZGJfZmx1c2hfbWV0aG9kID0gT19ESVJFQ1QKcGVyZm9ybWFuY2Vfc2NoZW1hID0gT04KaW5ub2RiLWZpbGUtcGVyLXRhYmxlID0gMQppbm5vZGJfaW9fY2FwYWNpdHkgPSAyMDAwMAppbm5vZGJfcmVhZF9pb190aHJlYWRzID0gNjQKaW5ub2RiX3dyaXRlX2lvX3RocmVhZHMgPSA2NAppbm5vZGJfdGhyZWFkX2NvbmN1cnJlbmN5ID0gMAppbm5vZGJfdGFibGVfbG9ja3MgPSAwCmlubm9kYl9sb2NrX3dhaXRfdGltZW91dCA9IDAKaW5ub2RiX2RlYWRsb2NrX2RldGVjdCA9IDAKCnNxbC1tb2RlID0gIk5PX0VOR0lORV9TVUJTVElUVVRJT04iCgpbbXlzcWxkdW1wXQpxdWljawpxdW90ZS1uYW1lcwptYXhfYWxsb3dlZF9wYWNrZXQgPSAxNk0=")
+rMySQLCnf = base64.b64decode("IyBYdHJlYW0gQ29kZXMgLSBVcGRhdGVkIGZvciBNYXJpYURCIDExLjUKCltjbGllbnRdCnBvcnQgPSAzMzA2Cgpb bXlzcWxkX3NhZmVdCm5pY2UgPSAwCgpb bXlzcWxkXQp1c2VyID0gbXlzcWwKcG9ydCA9IDc5OTkKYmFzZWRpciA9IC91c3IKZGF0YWRpciA9IC92YXIvbGliL215c3FsCnRtcGRpciA9IC90bXAKbGMtbWVzc2FnZXMtZGlyID0gL3Vzci9zaGFyZS9teXNxbApza2lwLWV4dGVybmFsLWxvY2tpbmcKc2tpcC1uYW1lLXJlc29sdmU9MQoKYmluZC1hZGRyZXNzID0gKgprZXlfYnVmZmVyX3NpemUgPSAxMjhNCgpteWlzYW0tcmVjb3Zlci1vcHRpb25zID0gQkFDS1VQCm1heF9hbGxvd2VkX3BhY2tldCA9IDY0TQptYXhfbGVuZ3RoX2Zvcl9zb3J0X2RhdGEgPSA4MTkyCnF1ZXJ5X2NhY2hlX2xpbWl0ID0gNE0KcXVlcnlfY2FjaGVfc2l6ZSA9IDAKcXVlcnlfY2FjaGVfdHlwZSA9IDAKCmV4cGlyZV9sb2dzX2RheXMgPSAxMAptYXhfYmlubG9nX3NpemUgPSAxMDBNCgptYXhfY29ubmVjdGlvbnMgPSAyMDAwCmJhY2tfbG9nID0gNDA5NgpvcGVuX2ZpbGVzX2xpbWl0ID0gMTYzODQKaW5ub2RiX29wZW5fZmlsZXMgPSAxNjM4NAptYXhfY29ubmVjdF9lcnJvcnMgPSAzMDcyCnRhYmxlX29wZW5fY2FjaGUgPSA0MDk2CnRhYmxlX2RlZmluaXRpb25fY2FjaGUgPSA0MDk2Cgp0bXBfdGFibGVfc2l6ZSA9IDFH bWF4X2hlYXBfdGFibGVfc2l6ZSA9IDFHCgppbm5vZGJfYnVmZmVyX3Bvb2xfc2l6ZSA9IDEyOE0KaW5ub2RiX2xvZ19maWxlX3NpemUgPSAyNTZNCmlubm9kYl9sb2dfYnVmZmVyX3NpemUgPSAxNk0KaW5ub2RiX2ZsdXNoX2xvZ19hdF90cnhfY29tbWl0ID0gMgppbm5vZGJfZmx1c2hfbWV0aG9kID0gT19ESVJFQ1QKcGVyZm9ybWFuY2Vfc2NoZW1hID0gT04KaW5ub2RiLWZpbGUtcGVyLXRhYmxlID0gMQppbm5vZGJfaW9fY2FwYWNpdHkgPSAyMDAwMAppbm5vZGJfcmVhZF9pb190aHJlYWRzID0gNjQKaW5ub2RiX3dyaXRlX2lvX3RocmVhZHMgPSA2NAppbm5vZGJfdGFibGVfbG9ja3MgPSAwCmlubm9kYl9sb2NrX3dhaXRfdGltZW91dCA9IDAKaW5ub2RiX2RlYWRsb2NrX2RldGVjdCA9IDAKCnNxbC1tb2RlID0gIk5PX0VOR0lORV9TVUJTVElUVVRJT04iCgpbbXlzcWxkdW1wXQpxdWljawpxdW90ZS1uYW1lcwptYXhfYWxsb3dlZF9wYWNrZXQgPSAxNk0=")
 
 rVersions = {
-    "24.04": "noble"
+    "24.04": "noble",
+    "26.04": "noble"  # placeholder codename; adjust when 26.04 ships
 }
 
 class col:
@@ -49,13 +49,32 @@ def getVersion():
     try: return os.popen("lsb_release -d").read().split(":")[-1].strip()
     except: return ""
 
-def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=46):
-    print("%s ┌─────────────────────────────────────────────────┐ %s" % (rColour, col.ENDC))
-    for i in range(rPadding): print("%s │                                                 │ %s" % (rColour, col.ENDC))
-    array = [rText[i:i+rLimit] for i in range(0, len(rText), rLimit)]
-    for i in array : print("%s │ %s%s%s │ %s" % (rColour, " "*round(23-(len(i)/2)), i, " "*round(46-(22-(len(i)/2))-len(i)), col.ENDC))
-    for i in range(rPadding): print("%s │                                                 │ %s" % (rColour, col.ENDC))
-    print("%s └─────────────────────────────────────────────────┘ %s" % (rColour, col.ENDC))
+def term_width():
+    try:
+        return shutil.get_terminal_size((60, 20)).columns
+    except Exception:
+        return 60
+
+def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=None):
+    width = term_width()
+    box_w = min(34, max(24, width - 4))
+    inner = box_w
+    if rLimit is None:
+        rLimit = inner - 2
+    text_lines = [rText[i:i+rLimit] for i in range(0, len(rText), rLimit)] or [""]
+    top = "%s┏%s┓%s" % (rColour, "━" * (inner + 2), col.ENDC)
+    bot = "%s┗%s┛%s" % (rColour, "━" * (inner + 2), col.ENDC)
+    print(top)
+    for _ in range(rPadding):
+        print("%s┃%s┃%s" % (rColour, " " * (inner + 2), col.ENDC))
+    for line in text_lines:
+        pad_total = inner + 2 - len(line)
+        left = pad_total // 2
+        right = pad_total - left
+        print("%s┃%s%s%s┃%s" % (rColour, " " * left, line, " " * right, col.ENDC))
+    for _ in range(rPadding):
+        print("%s┃%s┃%s" % (rColour, " " * (inner + 2), col.ENDC))
+    print(bot)
     print(" ")
 
 def is_installed(package_name):
@@ -118,7 +137,7 @@ def prepare(rType="MAIN"):
     paramiko_installed = subprocess.run("pip2.7 show paramiko > /dev/null 2>&1", shell=True).returncode == 0
 
     if not python_installed or not pip_installed or not paramiko_installed:
-        printc("Installing python2 & pip2 & paramiko...")
+        printc("Installing python2 & pip2 & paramiko")
         subprocess.run("sudo apt install -y build-essential checkinstall libncursesw5-dev libssl-dev libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev curl tar > /dev/null 2>&1", shell=True)
 
         if not python_installed:
@@ -216,14 +235,19 @@ def mysql(rUsername, rPassword):
     if os.path.exists("/etc/mysql/my.cnf"):
         if open("/etc/mysql/my.cnf", "r").read(14) == "# Xtream Codes": rCreate = False
     if rCreate:
+        # 🔧 رفع مشکل MariaDB 11.5: مدیریت فایل‌های ib_logfile موجود
+        for log_file in glob.glob("/var/lib/mysql/ib_logfile*"):
+            try:
+                os.rename(log_file, log_file + ".bak")
+            except Exception:
+                pass
         shutil.copy("/etc/mysql/my.cnf", "/etc/mysql/my.cnf.xc")
         rFile = open("/etc/mysql/my.cnf", "wb")
         rFile.write(rMySQLCnf)
         rFile.close()
         os.system("systemctl restart mariadb > /dev/null")
-    #printc("Enter MySQL Root Password:", col.BRIGHT_RED)
     for i in range(5):
-        rMySQLRoot = "" #raw_input("  ")
+        rMySQLRoot = ""
         print(" ")
         if len(rMySQLRoot) > 0: rExtra = " -p%s" % rMySQLRoot
         else: rExtra = ""
@@ -237,7 +261,7 @@ def mysql(rUsername, rPassword):
                 os.system('mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO streaming_servers (id, server_name, domain_name, server_ip, vpn_ip, ssh_password, ssh_port, diff_time_main, http_broadcast_port, total_clients, system_os, network_interface, latency, status, enable_geoip, geoip_countries, last_check_ago, can_delete, server_hardware, total_services, persistent_connections, rtmp_port, geoip_type, isp_names, isp_type, enable_isp, boost_fpm, http_ports_add, network_guaranteed_speed, https_broadcast_port, https_ports_add, whitelist_ips, watchdog_data, timeshift_only) VALUES (1, \'Main Server\', \'\', \'%s\', \'\', NULL, NULL, 0, 25461, 1000, \'%s\', \'eth0\', 0, 1, 0, \'\', 0, 0, \'{}\', 3, 0, 25462, \'low_priority\', \'\', \'low_priority\', 0, 1, \'\', 1000, 25463, \'\', \'[\"127.0.0.1\",\"\"]\', \'{}\', 0);" > /dev/null' % (rExtra, getIP(), getVersion()))
                 os.system('mysql -u root%s -e "USE xtream_iptvpro; REPLACE INTO reg_users (id, username, password, email, member_group_id, verified, status) VALUES (1, \'admin\', \'\\$6\\$rounds=20000\\$xtreamcodes\\$XThC5OwfuS0YwS4ahiifzF14vkGbGsFF1w7ETL4sRRC5sOrAWCjWvQJDromZUQoQuwbAXAFdX3h3Cp3vqulpS0\', \'admin@website.com\', 1, 1, 1);" > /dev/null'  % rExtra)
                 os.system('mysql -u root%s -e "CREATE USER \'%s\'@\'%%\' IDENTIFIED BY \'%s\'; GRANT ALL PRIVILEGES ON xtream_iptvpro.* TO \'%s\'@\'%%\' WITH GRANT OPTION; GRANT SELECT, LOCK TABLES ON *.* TO \'%s\'@\'%%\';FLUSH PRIVILEGES;" > /dev/null' % (rExtra, rUsername, rPassword, rUsername, rUsername))
-                os.system('mysql -u root%s -e "USE xtream_iptvpro; CREATE TABLE IF NOT EXISTS dashboard_statistics (id int(11) NOT NULL AUTO_INCREMENT, type varchar(16) NOT NULL DEFAULT \'\', time int(16) NOT NULL DEFAULT \'0\', count int(16) NOT NULL DEFAULT \'0\', PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=latin1; INSERT INTO dashboard_statistics (type, time, count) VALUES(\'conns\', UNIX_TIMESTAMP(), 0),(\'users\', UNIX_TIMESTAMP(), 0);\" > /dev/null' % rExtra)
+                os.system('mysql -u root%s -e "USE xtream_iptvpro; CREATE TABLE IF NOT EXISTS dashboard_statistics (id int(11) NOT NULL AUTO_INCREMENT, type varchar(16) NOT NULL DEFAULT \'\', time int(16) NOT NULL DEFAULT \'0\', count int(16) NOT NULL DEFAULT \'0\', PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=latin1; INSERT INTO dashboard_statistics (type, time, count) VALUES(\'conns\', UNIX_TIMESTAMP(), 0),(\'users\', UNIX_TIMESTAMP(), 0);" > /dev/null' % rExtra)
             try: os.remove("/home/xtreamcodes/iptv_xtream_codes/database.sql")
             except: pass
             return True
@@ -253,12 +277,12 @@ def encrypt(rHost="127.0.0.1", rUsername="user_iptvpro", rPassword="", rDatabase
         rUsername = rDecrypt["db_user"]
         rDatabase = rDecrypt["db_name"]
         rPort = int(rDecrypt["db_port"])
-    printc("Encrypting...")
+    printc("Encrypting")
     try: os.remove("/home/xtreamcodes/iptv_xtream_codes/config")
     except: pass
 
     rf = open('/home/xtreamcodes/iptv_xtream_codes/config', 'wb')
-    lestring=''.join(chr(ord(c)^ord(k)) for c,k in zip('{\"host\":\"%s\",\"db_user\":\"%s\",\"db_pass\":\"%s\",\"db_name\":\"%s\",\"server_id\":\"%d\", \"db_port\":\"%d\"}' % (rHost, rUsername, rPassword, rDatabase, rServerID, rPort), cycle('5709650b0d7806074842c6de575025b1')))
+    lestring=''.join(chr(ord(c)^ord(k)) for c,k in zip('{"host":"%s","db_user":"%s","db_pass":"%s","db_name":"%s","server_id":"%d", "db_port":"%d"}' % (rHost, rUsername, rPassword, rDatabase, rServerID, rPort), cycle('5709650b0d7806074842c6de575025b1')))
     rf.write(base64.b64encode(bytes(lestring, 'ascii')))
     rf.close()
 
@@ -351,9 +375,9 @@ if __name__ == "__main__":
     try: rVersion = os.popen('lsb_release -sr').read().strip()
     except: rVersion = None
     if not rVersion in rVersions:
-        printc("It can only be installed on Ubuntu 24.04")
+        printc("It can only be installed on Ubuntu 24.04 / 26.04")
         sys.exit(1)
-    printc("X-UI installer in Ubuntu %s - Masoud-Gb" % rVersion, col.GREEN, 2)
+    printc("X-UI installer Ubuntu %s - Masoud-Gb" % rVersion, col.GREEN, 1)
     print(" ")
     rType = input("  Installation Type [MAIN, LB, UPDATE]: ")
     print(" ")
@@ -385,12 +409,11 @@ if __name__ == "__main__":
                     modifyNginx()
                     update(rType.upper())
                 start()
-                printc("Installation completed!", col.GREEN, 2)
+                printc("Installation completed!", col.GREEN, 1)
                 if rType.upper() == "MAIN":
-                    printc("Please store your MySQL password: %s" % rPassword, col.BRIGHT_YELLOW)
-                    printc("Admin UI Wan IP: http://%s:25500" % getIP(), col.BRIGHT_YELLOW)
-                    printc("Admin UI default login is admin/admin", col.BRIGHT_YELLOW)
-                    printc("Save Credentials is file to /root/credentials.txt", col.BRIGHT_YELLOW)
+                    printc("MySQL pass: %s" % rPassword, col.BRIGHT_YELLOW)
+                    printc("Admin UI: http://%s:25500" % getIP(), col.BRIGHT_YELLOW)
+                    printc("Login: admin/admin", col.BRIGHT_YELLOW)
                     rFile = open("/root/credentials.txt", "w")
                     rFile.write("MySQL password: %s\n" % rPassword)
                     rFile.write("Admin UI Wan IP: http://%s:25500\n" % getIP())
@@ -403,7 +426,7 @@ if __name__ == "__main__":
             printc("Update To Xtream-UI CKMOD 41 ? Y/N?", col.BRIGHT_YELLOW)
             if input("  ").upper() == "Y":
                 if not update(rType.upper()): sys.exit(1)
-                printc("Installation completed!", col.GREEN, 2)
+                printc("Installation completed!", col.GREEN, 1)
                 start()
             else: printc("Install Xtream Codes Main first!", col.BRIGHT_RED)
     else: printc("Invalid installation type", col.BRIGHT_RED)
