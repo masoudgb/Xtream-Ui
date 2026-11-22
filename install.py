@@ -57,8 +57,8 @@ def term_width():
 
 def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=None):
     width = term_width()
-    box_w = min(50, max(38, width - 4))
-    h_pad = 3 
+    box_w = min(36, max(30, width - 6))
+    h_pad = 2 
     
     if rLimit is None:
         rLimit = box_w - (h_pad * 2)
@@ -71,27 +71,28 @@ def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=None):
         else:
             wrapped_lines.extend(lines)
 
-    top = "%s┏%s┓%s" % (rColour, "━" * (box_w + (h_pad * 2) - 2), col.ENDC)
-    bot = "%s┗%s┛%s" % (rColour, "━" * (box_w + (h_pad * 2) - 2), col.ENDC)
+    total_inner_w = box_w + (h_pad * 2) - 2
+    top = "%s┏%s┓%s" % (rColour, "━" * total_inner_w, col.ENDC)
+    bot = "%s┗%s┛%s" % (rColour, "━" * total_inner_w, col.ENDC)
     
     print(top)
     
     for _ in range(rPadding):
-        print("%s┃%s┃%s" % (rColour, " " * (box_w + (h_pad * 2) - 2), col.ENDC))
+        print("%s┃%s┃%s" % (rColour, " " * total_inner_w, col.ENDC))
         
     for line in wrapped_lines:
-        pad_total = (box_w + (h_pad * 2) - 2) - len(line)
+        pad_total = total_inner_w - len(line)
         left_space = (pad_total // 2)
         right_space = pad_total - left_space
         
         if left_space < h_pad:
             left_space = h_pad
-            right_space = (box_w + (h_pad * 2) - 2) - len(line) - left_space
+            right_space = total_inner_w - len(line) - left_space
             
-        print("%s┃%s%s%s%s%s┃%s" % (rColour, " "*left_space, line, " "*right_space, "", "", col.ENDC))
+        print("%s┃%s%s%s%s┃%s" % (rColour, " "*left_space, line, " "*right_space, col.ENDC))
         
     for _ in range(rPadding):
-        print("%s┃%s┃%s" % (rColour, " " * (box_w + (h_pad * 2) - 2), col.ENDC))
+        print("%s┃%s┃%s" % (rColour, " " * total_inner_w, col.ENDC))
         
     print(bot)
     print(" ")
@@ -392,8 +393,11 @@ if __name__ == "__main__":
         sys.exit(1)
     printc("X-UI installer Ubuntu %s - Masoud-Gb" % rVersion, col.GREEN, 1)
     print(" ")
-    rType = input("  Installation Type [MAIN, LB, UPDATE]: ")
+    
+    input_prompt = "  Installation Type [%sMAIN%s, %sLB%s, %sUPDATE%s]: " % (col.BRIGHT_GREEN, col.ENDC, col.BRIGHT_GREEN, col.ENDC, col.BRIGHT_GREEN, col.ENDC)
+    rType = input(input_prompt)
     print(" ")
+    
     if rType.upper() in ["MAIN", "LB"]:
         if rType.upper() == "LB":
             rHost = input("  Main Server IP Address: ")
