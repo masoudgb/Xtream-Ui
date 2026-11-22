@@ -14,7 +14,7 @@ rMySQLCnf = base64.b64decode("IyBYdHJlYW0gQ29kZXMgLSBVcGRhdGVkIGZvciBNYXJpYURCID
 
 rVersions = {
     "24.04": "noble",
-    "26.04": "noble"  # placeholder codename; adjust when 26.04 ships
+    "26.04": "noble"
 }
 
 class col:
