@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
-import subprocess, os, random, string, sys, shutil, socket, zipfile, urllib.request, urllib.error, urllib.parse, json, base64, glob
+import subprocess, os, random, string, sys, shutil, socket, zipfile, urllib.request, urllib.error, urllib.parse, json, base64, glob, textwrap
 from itertools import cycle
 from zipfile import ZipFile
 from urllib.request import Request, urlopen
@@ -57,23 +57,42 @@ def term_width():
 
 def printc(rText, rColour=col.BRIGHT_GREEN, rPadding=0, rLimit=None):
     width = term_width()
-    box_w = min(34, max(24, width - 4))
-    inner = box_w
+    box_w = min(50, max(38, width - 4))
+    h_pad = 3 
+    
     if rLimit is None:
-        rLimit = inner - 2
-    text_lines = [rText[i:i+rLimit] for i in range(0, len(rText), rLimit)] or [""]
-    top = "%s┏%s┓%s" % (rColour, "━" * (inner + 2), col.ENDC)
-    bot = "%s┗%s┛%s" % (rColour, "━" * (inner + 2), col.ENDC)
+        rLimit = box_w - (h_pad * 2)
+
+    wrapped_lines = []
+    for paragraph in rText.split('\n'):
+        lines = textwrap.wrap(paragraph, width=rLimit)
+        if not lines:
+            wrapped_lines.append("")
+        else:
+            wrapped_lines.extend(lines)
+
+    top = "%s┏%s┓%s" % (rColour, "━" * (box_w + (h_pad * 2) - 2), col.ENDC)
+    bot = "%s┗%s┛%s" % (rColour, "━" * (box_w + (h_pad * 2) - 2), col.ENDC)
+    
     print(top)
+    
     for _ in range(rPadding):
-        print("%s┃%s┃%s" % (rColour, " " * (inner + 2), col.ENDC))
-    for line in text_lines:
-        pad_total = inner + 2 - len(line)
-        left = pad_total // 2
-        right = pad_total - left
-        print("%s┃%s%s%s┃%s" % (rColour, " " * left, line, " " * right, col.ENDC))
+        print("%s┃%s┃%s" % (rColour, " " * (box_w + (h_pad * 2) - 2), col.ENDC))
+        
+    for line in wrapped_lines:
+        pad_total = (box_w + (h_pad * 2) - 2) - len(line)
+        left_space = (pad_total // 2)
+        right_space = pad_total - left_space
+        
+        if left_space < h_pad:
+            left_space = h_pad
+            right_space = (box_w + (h_pad * 2) - 2) - len(line) - left_space
+            
+        print("%s┃%s%s%s%s%s┃%s" % (rColour, " "*left_space, line, " "*right_space, "", "", col.ENDC))
+        
     for _ in range(rPadding):
-        print("%s┃%s┃%s" % (rColour, " " * (inner + 2), col.ENDC))
+        print("%s┃%s┃%s" % (rColour, " " * (box_w + (h_pad * 2) - 2), col.ENDC))
+        
     print(bot)
     print(" ")
 
@@ -235,17 +254,12 @@ def mysql(rUsername, rPassword):
     if os.path.exists("/etc/mysql/my.cnf"):
         if open("/etc/mysql/my.cnf", "r").read(14) == "# Xtream Codes": rCreate = False
     if rCreate:
-        # 🔧 رفع مشکل MariaDB 11.5: مدیریت فایل‌های ib_logfile موجود
-        for log_file in glob.glob("/var/lib/mysql/ib_logfile*"):
-            try:
-                os.rename(log_file, log_file + ".bak")
-            except Exception:
-                pass
         shutil.copy("/etc/mysql/my.cnf", "/etc/mysql/my.cnf.xc")
         rFile = open("/etc/mysql/my.cnf", "wb")
         rFile.write(rMySQLCnf)
         rFile.close()
         os.system("systemctl restart mariadb > /dev/null")
+        os.system('mysql -u root -e "SET GLOBAL innodb_log_file_size=268435456;" > /dev/null 2>&1')
     for i in range(5):
         rMySQLRoot = ""
         print(" ")
@@ -332,7 +346,6 @@ def start(first=True):
     os.system("/home/xtreamcodes/iptv_xtream_codes/start_services.sh > /dev/null")
     
 def modifyNginx():
-
     printc("Modifying Nginx")
     rPath = "/home/xtreamcodes/iptv_xtream_codes/nginx/conf/nginx.conf"
     rPrevData = open(rPath, "r").read()
